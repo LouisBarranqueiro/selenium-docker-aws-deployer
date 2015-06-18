@@ -44,16 +44,16 @@ class SeleniumGithub(unittest.TestCase):
     def test_fork_repository(self):
         """ Login into Github account and fork the "django-docker-started" repository
         """
-        # # go on the `django-docker-starter` GitHub repository and fork repository
-        # self.fork_github_repo()
-        # # create automated build repository on DockerHub
-        # self.create_dockerhub_build_repo()
+        # go on the `django-docker-starter` GitHub repository and fork repository
+        self.fork_github_repo()
+        # create automated build repository on DockerHub
+        self.create_dockerhub_build_repo()
         # create `tutum` user on AWS
         tutum_access_kei_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
         # link AWS account to Tutum
         self.link_aws_account_to_tutum(tutum_access_kei_id, tutum_secret_access_key)
         # create tutum service on Tutum
-        # self.create_tutum_service()
+        self.create_tutum_service()
 
     def login_into_github(self):
         """ Login into DockerHub
