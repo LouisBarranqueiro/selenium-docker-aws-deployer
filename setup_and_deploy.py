@@ -160,6 +160,39 @@ class SeleniumGithub(unittest.TestCase):
 
         return tutum_access_key_id, tutum_secret_access_key
 
+    def create_tutum_service(self):
+        """ Create a tutum service based on the docker container previously builded
+        """
+        driver = self.driver
+        service_available = False
+        # login into tutum
+        self.login_into_tutum()
+        driver.find_element_by_link_text("Services").click()
+        # first service
+        if driver.find_element_by_link_text("Create your first service") > 0:
+            driver.find_element_by_link_text("Create your first service").click()
+            service_available = True
+        # not the first service
+        elif driver.find_element_by_link_text("Create service").size() > 0:
+            driver.find_element_by_link_text("Create service").click()
+            service_available = True
+
+        if service_available:
+            driver.find_element_by_link_text("Public images").click()
+            driver.find_element_by_link_text("Search Docker hub").click()
+            driver.find_element_by_id("search").clear()
+            driver.find_element_by_id("search").send_keys("django-docker-starter")
+            driver.find_element_by_id("search").clear()
+            driver.find_element_by_id("search").send_keys(self.GITHUB_STARTER_REPO_NAME)
+            driver.find_element_by_xpath("//button[@onclick='selectImage(this)']").click()
+            driver.find_element_by_css_selector("div.overlay-message").click()
+            driver.find_element_by_css_selector("input[type=\"checkbox\"]").click()
+            driver.find_element_by_xpath("//div[@id='image-ports-wrapper']/div/div/div/table/tbody/tr/td[4]/span").click()
+            driver.find_element_by_css_selector("input.form-control.input-sm").clear()
+            driver.find_element_by_css_selector("input.form-control.input-sm").send_keys("80")
+            driver.find_element_by_id("step-container").click()
+            driver.find_element_by_id("btn-deploy-services").click()
+
     def is_element_present(self, how, what):
         try:
             self.driver.find_element(by = how, value = what)
