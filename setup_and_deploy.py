@@ -127,6 +127,39 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_id("ap_password").send_keys("euc-dMB-y52-ZQT")
         driver.find_element_by_id("signInSubmit-input").click()
 
+    def create_tutum_user_on_aws(self):
+        """ Create a user (name: tutum) on AWS
+        """
+
+        driver = self.driver
+        # login into AWS
+        self.login_into_aws()
+        driver.find_element_by_xpath("//div[@id='serviceColumn2']/div/div/a[2]/div[2]").click()
+        driver.find_element_by_link_text("Users").click()
+        driver.find_element_by_xpath("//div[@id='c']/div[2]/div[2]/div/div/div/button").click()
+        driver.find_element_by_css_selector("li > input").clear()
+        driver.find_element_by_css_selector("li > input").send_keys("tutum")
+        driver.find_element_by_xpath("//div[@id='c']/div/div[2]/div/div[2]/div[3]/div/button").click()
+        driver.find_element_by_link_text("Show User Security Credentials").click()
+        # Get information of `tutum` user
+        tutum_access_key_id = driver.find_elements_by_class_name("attrValue").get(1).text
+        tutum_secret_access_key = driver.find_element_by_class_name("userAttributes").find_elements_by_class_name("attrValue").get(2).text
+        # Set policy for `tutum` user
+        driver.find_element_by_css_selector("a.pointer.btn_close > strong").click()
+        driver.find_element_by_id("downloadCredentials").click()
+        driver.find_element_by_css_selector("#closeWindow > strong").click()
+        driver.find_element_by_css_selector("div.tableField").click()
+        driver.find_element_by_xpath("//div[@id='secaccordion']/div[2]/div/div/div").click()
+        driver.find_element_by_link_text("click here").click()
+        driver.find_element_by_xpath("(//input[@name='accordion-radio'])[2]").click()
+        driver.find_element_by_xpath("//div[@id='c']/div/div[2]/div/div/ol/li[2]/div[2]/div/div[2]/button").click()
+        driver.find_element_by_id("policy_name").clear()
+        driver.find_element_by_id("policy_name").send_keys("tutum-policy")
+        driver.find_element_by_css_selector("button.btn.validatebtn").click()
+        driver.find_element_by_xpath("//div[@id='c']/div/div[2]/div/div[2]/div[3]/div/button[2]").click()
+
+        return tutum_access_key_id, tutum_secret_access_key
+
     def is_element_present(self, how, what):
         try:
             self.driver.find_element(by = how, value = what)
