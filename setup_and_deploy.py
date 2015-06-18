@@ -28,8 +28,8 @@ class SeleniumGithub(unittest.TestCase):
     # AWS URL
     AWS_URL = "http://aws.amazon.com"
     # AWS credentials
-    AWS_LOGIN = ""
-    AWS_PASSWORD = ""
+    AWS_LOGIN = "developer.mail.no.reply@gmail.com"
+    AWS_PASSWORD = "euc-dMB-y52-ZQT"
 
     def setUp(self):
         """ Setup
@@ -53,7 +53,7 @@ class SeleniumGithub(unittest.TestCase):
         # link AWS account to Tutum
         self.link_aws_account_to_tutum(tutum_access_kei_id, tutum_secret_access_key)
         # create tutum service on Tutum
-        self.create_tutum_service()
+        # self.create_tutum_service()
 
     def login_into_github(self):
         """ Login into DockerHub
@@ -126,11 +126,13 @@ class SeleniumGithub(unittest.TestCase):
 
         driver = self.driver
         driver.get(self.AWS_URL)
+        driver.find_element_by_css_selector("[data-dropdown=\"aws-nav-dropdown-account\"]").click()
+        driver.find_element_by_css_selector("[data-dropdown=\"aws-nav-dropdown-account\"]").click()
         driver.find_element_by_link_text("AWS Management Console").click()
         driver.find_element_by_id("ap_email").clear()
-        driver.find_element_by_id("ap_email").send_keys("developer.mail.no.reply@gmail.com")
+        driver.find_element_by_id("ap_email").send_keys(self.AWS_LOGIN)
         driver.find_element_by_id("ap_password").clear()
-        driver.find_element_by_id("ap_password").send_keys("euc-dMB-y52-ZQT")
+        driver.find_element_by_id("ap_password").send_keys(self.AWS_PASSWORD)
         driver.find_element_by_id("signInSubmit-input").click()
 
     def create_tutum_user_on_aws(self):
@@ -148,15 +150,18 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_xpath("//div[@id='c']/div/div[2]/div/div[2]/div[3]/div/button").click()
         driver.find_element_by_link_text("Show User Security Credentials").click()
         # Get information of `tutum` user
-        tutum_access_key_id = driver.find_elements_by_class_name("attrValue").get(1).text
-        tutum_secret_access_key = driver.find_element_by_class_name("userAttributes").find_elements_by_class_name("attrValue").get(2).text
+        tutum_access_key_id = driver.find_elements_by_class_name("attrValue")[0].text
+        tutum_secret_access_key = driver.find_elements_by_class_name("attrValue")[1].text
         # Set policy for `tutum` user
         driver.find_element_by_css_selector("a.pointer.btn_close > strong").click()
-        driver.find_element_by_id("downloadCredentials").click()
         driver.find_element_by_css_selector("#closeWindow > strong").click()
         driver.find_element_by_css_selector("div.tableField").click()
-        driver.find_element_by_xpath("//div[@id='secaccordion']/div[2]/div/div/div").click()
-        driver.find_element_by_link_text("click here").click()
+        if driver.find_element_by_id("attachUserPolicy").is_displayed():
+            driver.find_element_by_id("attachUserPolicy").click()
+        else:
+            driver.find_element_by_css_selector("div[data-target=\"#inlinePolicies\"]").click()
+            driver.find_element_by_css_selector("a.pointer.attachInlinePolicy").click()
+
         driver.find_element_by_xpath("(//input[@name='accordion-radio'])[2]").click()
         driver.find_element_by_xpath("//div[@id='c']/div/div[2]/div/div/ol/li[2]/div[2]/div/div[2]/button").click()
         driver.find_element_by_id("policy_name").clear()
@@ -211,9 +216,9 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_xpath("//div[@id='navbar-container']/div[2]/ul/li[3]/ul/li/a/i").click()
         driver.find_element_by_css_selector("div.aws-not-linked > #aws-link").click()
         driver.find_element_by_id("access-key").clear()
-        driver.find_element_by_id("access-key").send_keys("AKIAIRI6AJ7YTJYW4SSQ")
+        driver.find_element_by_id("access-key").send_keys(tutum_access_key_id)
         driver.find_element_by_id("secret-access-key").clear()
-        driver.find_element_by_id("secret-access-key").send_keys("AjCmrwjWmmlqWv0yseAwhq1vAig/ObBiHcRMe+J/")
+        driver.find_element_by_id("secret-access-key").send_keys(tutum_secret_access_key)
         driver.find_element_by_id("aws-save-credentials").click()
 
     def is_element_present(self, how, what):
