@@ -24,6 +24,11 @@ class SeleniumGithub(unittest.TestCase):
     # Tutum credentials
     TUTUM_LOGIN = "developer.mail.no.reply@gmail.com"
     TUTUM_PASSWORD = "euc-dMB-y52-ZQT"
+    # AWS URL
+    AWS_URL = "http://aws.amazon.com"
+    # AWS credentials
+    AWS_LOGIN = ""
+    AWS_PASSWORD = ""
 
     def setUp(self):
         """ Setup
@@ -38,9 +43,18 @@ class SeleniumGithub(unittest.TestCase):
     def test_fork_repository(self):
         """ Login into Github account and fork the "django-docker-started" repository
         """
+        # # go on the `django-docker-starter` GitHub repository and fork repository
+        # self.fork_github_repo()
+        # # create automated build repository on DockerHub
+        # self.create_dockerhub_build_repo()
+        # create a new service
+        self.create_tutum_service()
+
+    def login_into_github(self):
+        """ Login into DockerHub
+        """
 
         driver = self.driver
-        # login into GitHub
         driver.get(self.GITHUB_URL)
         driver.find_element_by_link_text("Sign in").click()
         driver.find_element_by_id("login_field").clear()
@@ -48,11 +62,21 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_id("password").clear()
         driver.find_element_by_id("password").send_keys(self.GITHUB_PASSWORD)
         driver.find_element_by_name("commit").click()
-        # go on the `django-docker-starter` GitHub repository
+
+    def fork_github_repo(self):
+        """ Fork the `django-docker-starter`
+        """
+
+        driver = self.driver
+        # login into GitHub
+        self.login_into_github()
         driver.get(self.GITHUB_STARTER_REPO_URL)
-        # fork repository
         driver.find_element_by_xpath("//button[@type='submit']").click()
-        # Login into Docker Hub
+
+    def login_into_dockerhub(self):
+        """ Login into DockerHub
+        """
+        driver = self.driver
         driver.get(self.DOCKER_HUB_URL + "/account/signup/")
         driver.find_element_by_link_text("Log In").click()
         driver.find_element_by_id("id_username").clear()
@@ -60,7 +84,16 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_id("id_password").clear()
         driver.find_element_by_id("id_password").send_keys("euc-dMB-y52-ZQT")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        # create automated build repository
+
+    def create_dockerhub_build_repo(self):
+        """
+            Create an automated build repository on DockerHub with the forked repository
+            and wait build of container
+        """
+
+        driver = self.driver
+        #login into DockerHub
+        self.login_into_dockerhub()
         driver.find_element_by_link_text("+ Add Repository").click()
         driver.find_element_by_link_text("Automated Build").click()
         driver.find_element_by_link_text("Select").click()
@@ -69,7 +102,11 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_name("action").click()
         # Wait during build of container (3min)
         time.sleep(3 * 60)
-        # Login into Tutum
+
+    def login_into_tutum(self):
+        """ Login into Tutum
+        """
+        driver = self.driver
         driver.get(self.TUTUM_URL)
         driver.find_element_by_link_text("Login").click()
         driver.find_element_by_id("id_username").clear()
@@ -77,7 +114,13 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_id("id_password").clear()
         driver.find_element_by_id("id_password").send_keys(self.TUTUM_PASSWORD)
         driver.find_element_by_xpath("//button[@type='submit']").click()
-        # create a new service
+
+    def create_tutum_service(self):
+        """ Create a tutum service based on the docker container previously builded
+        """
+        driver = self.driver
+        # login into tutum
+        self.login_into_tutum()
         driver.find_element_by_link_text("Services").click()
         driver.find_element_by_link_text("Create your first service").click()
         driver.find_element_by_id("search").clear()
@@ -87,7 +130,17 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_xpath("//button[2]").click()
         driver.find_element_by_id("btn-create-services").click()
 
-    def is_element_present(self, how, what):
+    def link_tutum_to_aws(self):
+        """ Link AWS account on Tutum
+        """
+        driver = self.driver
+        # login into tutum
+        self.login_into_tutum()
+
+
+
+
+def is_element_present(self, how, what):
         try:
             self.driver.find_element(by = how, value = what)
         except NoSuchElementException as e:
