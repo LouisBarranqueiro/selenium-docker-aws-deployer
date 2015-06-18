@@ -48,6 +48,12 @@ class SeleniumGithub(unittest.TestCase):
         # self.fork_github_repo()
         # # create automated build repository on DockerHub
         # self.create_dockerhub_build_repo()
+        # create `tutum` user on AWS
+        tutum_access_kei_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
+        # link AWS account to Tutum
+        self.link_aws_account_to_tutum(tutum_access_kei_id, tutum_secret_access_key)
+        # create tutum service on Tutum
+        self.create_tutum_service()
 
     def login_into_github(self):
         """ Login into DockerHub
@@ -163,6 +169,7 @@ class SeleniumGithub(unittest.TestCase):
     def create_tutum_service(self):
         """ Create a tutum service based on the docker container previously builded
         """
+
         driver = self.driver
         service_available = False
         # login into tutum
@@ -192,6 +199,22 @@ class SeleniumGithub(unittest.TestCase):
             driver.find_element_by_css_selector("input.form-control.input-sm").send_keys("80")
             driver.find_element_by_id("step-container").click()
             driver.find_element_by_id("btn-deploy-services").click()
+
+    def link_aws_account_to_tutum(self, tutum_access_key_id, tutum_secret_access_key):
+        """ Link AWS account to Tutum
+        """
+
+        driver = self.driver
+        # login into tutum
+        self.login_into_tutum()
+        driver.find_element_by_css_selector("span.user-info").click()
+        driver.find_element_by_xpath("//div[@id='navbar-container']/div[2]/ul/li[3]/ul/li/a/i").click()
+        driver.find_element_by_css_selector("div.aws-not-linked > #aws-link").click()
+        driver.find_element_by_id("access-key").clear()
+        driver.find_element_by_id("access-key").send_keys("AKIAIRI6AJ7YTJYW4SSQ")
+        driver.find_element_by_id("secret-access-key").clear()
+        driver.find_element_by_id("secret-access-key").send_keys("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")
+        driver.find_element_by_id("aws-save-credentials").click()
 
     def is_element_present(self, how, what):
         try:
