@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
@@ -47,8 +48,6 @@ class SeleniumGithub(unittest.TestCase):
         # self.fork_github_repo()
         # # create automated build repository on DockerHub
         # self.create_dockerhub_build_repo()
-        # create a new service
-        self.create_tutum_service()
 
     def login_into_github(self):
         """ Login into DockerHub
@@ -92,7 +91,7 @@ class SeleniumGithub(unittest.TestCase):
         """
 
         driver = self.driver
-        #login into DockerHub
+        # login into DockerHub
         self.login_into_dockerhub()
         driver.find_element_by_link_text("+ Add Repository").click()
         driver.find_element_by_link_text("Automated Build").click()
@@ -115,32 +114,20 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_id("id_password").send_keys(self.TUTUM_PASSWORD)
         driver.find_element_by_xpath("//button[@type='submit']").click()
 
-    def create_tutum_service(self):
-        """ Create a tutum service based on the docker container previously builded
+    def login_into_aws(self):
+        """ Login into AWS
         """
+
         driver = self.driver
-        # login into tutum
-        self.login_into_tutum()
-        driver.find_element_by_link_text("Services").click()
-        driver.find_element_by_link_text("Create your first service").click()
-        driver.find_element_by_id("search").clear()
-        driver.find_element_by_id("search").send_keys(self.GITHUB_STARTER_REPO_NAME)
-        driver.find_element_by_xpath("//button[@onclick='selectImage(this)']").click()
-        driver.find_element_by_id("show-more").click()
-        driver.find_element_by_xpath("//button[2]").click()
-        driver.find_element_by_id("btn-create-services").click()
+        driver.get(self.AWS_URL)
+        driver.find_element_by_link_text("AWS Management Console").click()
+        driver.find_element_by_id("ap_email").clear()
+        driver.find_element_by_id("ap_email").send_keys("developer.mail.no.reply@gmail.com")
+        driver.find_element_by_id("ap_password").clear()
+        driver.find_element_by_id("ap_password").send_keys("euc-dMB-y52-ZQT")
+        driver.find_element_by_id("signInSubmit-input").click()
 
-    def link_tutum_to_aws(self):
-        """ Link AWS account on Tutum
-        """
-        driver = self.driver
-        # login into tutum
-        self.login_into_tutum()
-
-
-
-
-def is_element_present(self, how, what):
+    def is_element_present(self, how, what):
         try:
             self.driver.find_element(by = how, value = what)
         except NoSuchElementException as e:
