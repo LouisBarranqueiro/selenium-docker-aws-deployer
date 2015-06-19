@@ -152,27 +152,20 @@ class SeleniumGithub(unittest.TestCase):
         # Get information of `tutum` user
         tutum_access_key_id = driver.find_elements_by_class_name("attrValue")[0].text
         tutum_secret_access_key = driver.find_elements_by_class_name("attrValue")[1].text
-        # Set policy for `tutum` user
-        driver.find_element_by_css_selector("a.pointer.btn_close > strong").click()
-        driver.find_element_by_css_selector("#closeWindow > strong").click()
+        # Attach policy (full access to EC2) to `tutum` user
+        driver.get("https://console.aws.amazon.com/iam/home?region=us-west-2")
+        driver.find_element_by_link_text("Policies").click()
+        driver.find_element_by_css_selector("button.getStarted").click()
+        driver.find_element_by_css_selector("td[title=\"AmazonEC2FullAccess\"]").click()
+        driver.find_element_by_css_selector("button.attach").click()
+        time.sleep(3)
         driver.find_element_by_css_selector("div.tableField").click()
-        if driver.find_element_by_id("attachUserPolicy").is_displayed():
-            driver.find_element_by_id("attachUserPolicy").click()
-        else:
-            driver.find_element_by_css_selector("div[data-target=\"#inlinePolicies\"]").click()
-            driver.find_element_by_css_selector("a.pointer.attachInlinePolicy").click()
-
-        driver.find_element_by_xpath("(//input[@name='accordion-radio'])[2]").click()
-        driver.find_element_by_xpath("//div[@id='c']/div/div[2]/div/div/ol/li[2]/div[2]/div/div[2]/button").click()
-        driver.find_element_by_id("policy_name").clear()
-        driver.find_element_by_id("policy_name").send_keys("tutum-policy")
-        driver.find_element_by_css_selector("button.btn.validatebtn").click()
-        driver.find_element_by_xpath("//div[@id='c']/div/div[2]/div/div[2]/div[3]/div/button[2]").click()
+        driver.find_element_by_css_selector("button.submit").click()
 
         return tutum_access_key_id, tutum_secret_access_key
 
     def create_tutum_service(self):
-        """ Create a tutum service based on the docker container previously builded
+        """ Create a Tutum service based on the docker container previously built
         """
 
         driver = self.driver
