@@ -50,15 +50,15 @@ class DjangoDockerAWS(unittest.TestCase):
         """
 
         # go on the `django-docker-starter` GitHub repository and fork repository
-        # self.fork_github_repo()
+        self.fork_github_repo()
         # create automated build repository on DockerHub
-        # self.create_dockerhub_build_repo()
+        self.create_dockerhub_build_repo()
         # create `tutum` user on AWS
-        # tutum_access_kei_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
+        tutum_access_kei_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
         # link AWS account to Tutum
-        # self.link_aws_account_to_tutum(tutum_access_kei_id, tutum_secret_access_key)
+        self.link_aws_account_to_tutum(tutum_access_kei_id, tutum_secret_access_key)
         # create tutum node on Tutum
-        # self.create_tutum_node()
+        self.create_tutum_node()
         # create tutum service on Tutum
         app_ip = self.create_tutum_service()
         # Watch application
@@ -88,15 +88,15 @@ class DjangoDockerAWS(unittest.TestCase):
         driver.find_element_by_xpath("//button[@type='submit']").click()
 
     def login_into_dockerhub(self):
-        """ Login into DockerHub
+        """ Login into Docker Hub
         """
         driver = self.driver
         driver.get(self.DOCKER_HUB_URL + "/account/signup/")
         driver.find_element_by_link_text("Log In").click()
         driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys("developer.mail.no.reply@gmail.com")
+        driver.find_element_by_id("id_username").send_keys(self.DOCKER_HUB_LOGIN)
         driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys("euc-dMB-y52-ZQT")
+        driver.find_element_by_id("id_password").send_keys(self.DOCKER_HUB_PASSWORD)
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
     def create_dockerhub_build_repo(self):
@@ -112,7 +112,8 @@ class DjangoDockerAWS(unittest.TestCase):
         driver.find_element_by_link_text("Automated Build").click()
         driver.find_element_by_link_text("Select").click()
         driver.find_element_by_link_text("developergithubnoreply").click()
-        driver.find_element_by_css_selector("[href=\"https://registry.hub.docker.com/builds/github/" + self.GITHUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "/\"]").click()
+        driver.find_element_by_css_selector("[href=\"https://registry.hub.docker.com/builds/github/" +
+                                            self.GITHUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "/\"]").click()
         driver.find_element_by_name("action").click()
         # Wait during build of container
         time.sleep(3.2 * 60)
