@@ -27,6 +27,8 @@ class SeleniumGithub(unittest.TestCase):
     TUTUM_PASSWORD = "euc-dMB-y52-ZQT"
     # Tutum node
     TUTUM_NODE_NAME = "django-node"
+    # Tutum service
+    TUTUM_SERVICE_NAME = "django-starter-app"
     # AWS URL
     AWS_URL = "http://aws.amazon.com"
     # AWS credentials
@@ -48,17 +50,17 @@ class SeleniumGithub(unittest.TestCase):
         """
 
         # go on the `django-docker-starter` GitHub repository and fork repository
-        self.fork_github_repo()
+        # self.fork_github_repo()
         # create automated build repository on DockerHub
-        self.create_dockerhub_build_repo()
+        # self.create_dockerhub_build_repo()
         # create `tutum` user on AWS
-        tutum_access_kei_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
+        # tutum_access_kei_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
         # link AWS account to Tutum
-        self.link_aws_account_to_tutum(tutum_access_kei_id, tutum_secret_access_key)
+        # self.link_aws_account_to_tutum(tutum_access_kei_id, tutum_secret_access_key)
         # create tutum node on Tutum
-        self.create_tutum_node()
+        # self.create_tutum_node()
         # create tutum service on Tutum
-        self.create_tutum_service()
+        app_ip = self.create_tutum_service()
 
     def login_into_github(self):
         """ Login into DockerHub
@@ -110,8 +112,8 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_link_text("developergithubnoreply").click()
         driver.find_element_by_css_selector("[href=\"https://registry.hub.docker.com/builds/github/" + self.GITHUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "/\"]").click()
         driver.find_element_by_name("action").click()
-        # Wait during build of container (3min)
-        time.sleep(3 * 60)
+        # Wait during build of container
+        time.sleep(3.2 * 60)
 
     def login_into_tutum(self):
         """ Login into Tutum
@@ -124,6 +126,75 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_id("id_password").clear()
         driver.find_element_by_id("id_password").send_keys(self.TUTUM_PASSWORD)
         driver.find_element_by_xpath("//button[@type='submit']").click()
+
+    def link_aws_account_to_tutum(self, tutum_access_key_id, tutum_secret_access_key):
+        """ Link AWS account to Tutum
+        """
+
+        driver = self.driver
+        # login into tutum
+        self.login_into_tutum()
+        driver.find_element_by_css_selector("span.user-info").click()
+        driver.find_element_by_xpath("//div[@id='navbar-container']/div[2]/ul/li[3]/ul/li/a/i").click()
+        driver.find_element_by_css_selector("div.aws-not-linked > #aws-link").click()
+        driver.find_element_by_id("access-key").clear()
+        driver.find_element_by_id("access-key").send_keys(tutum_access_key_id)
+        driver.find_element_by_id("secret-access-key").clear()
+        driver.find_element_by_id("secret-access-key").send_keys(tutum_secret_access_key)
+        driver.find_element_by_id("aws-save-credentials").click()
+
+    def create_tutum_node(self):
+        """ Create a Tutum node based on AWS
+        """
+
+        driver = self.driver
+        # login into tutum
+        self.login_into_tutum()
+        driver.find_element_by_css_selector("li.menu-item.menu-node > a > span.menu-text").click()
+        driver.find_element_by_css_selector("a[href=\"/node/launch/\"]").click()
+        driver.find_element_by_id("node-cluster-name").clear()
+        driver.find_element_by_id("node-cluster-name").send_keys(self.TUTUM_NODE_NAME)
+        # short delay to load javascript functions
+        time.sleep(5)
+        driver.find_element_by_id("btn-finish-node-cluster").click()
+        # wait for deployement of node
+        time.sleep(2.5 * 60)
+
+    def create_tutum_service(self):
+        """ Create a Tutum service based on the docker container previously built
+        """
+
+        driver = self.driver
+        # login into Tutum
+        self.login_into_tutum()
+        driver.find_element_by_link_text("Services").click()
+        driver.find_element_by_css_selector("a[href=\"/container/launch/\"]").click()
+        driver.find_element_by_link_text("Public images").click()
+        driver.find_element_by_link_text("Search Docker hub").click()
+        driver.find_element_by_id("search").clear()
+        driver.find_element_by_id("search").send_keys("django-docker-starter")
+        driver.find_element_by_id("search").clear()
+        driver.find_element_by_id("search").send_keys(self.GITHUB_STARTER_REPO_NAME)
+        driver.find_element_by_css_selector("button[data-image-name*=\"" + self.GITHUB_STARTER_REPO_NAME + "\"]").click()
+        driver.find_element_by_id("app-name").clear()
+        driver.find_element_by_id("app-name").send_keys(self.TUTUM_SERVICE_NAME)
+        # short delay to load javascript functions
+        time.sleep(3)
+        driver.find_element_by_css_selector("div.overlay.overlay-override").click()
+        driver.find_element_by_css_selector("input[type=\"checkbox\"]").click()
+        driver.find_element_by_xpath("//div[@id='image-ports-wrapper']/div/div/div/table/tbody/tr/td[4]/span").click()
+        driver.find_element_by_css_selector("input.form-control.input-sm").clear()
+        driver.find_element_by_css_selector("input.form-control.input-sm").send_keys("80")
+        driver.find_element_by_id("step-container").click()
+        driver.find_element_by_id("btn-deploy-services").click()
+        # short delay to launch the service
+        time.sleep(20)
+        driver.find_element_by_css_selector("td.container-link.sortable.renderable > a").click()
+        driver.find_element_by_css_selector("#node > a").click()
+        driver.execute_script("document.getElementsByClassName('info-bar')[0].getElementsByClassName('icon-link')[0].remove()")
+        node_ip = driver.find_element_by_xpath("//div[@class='info-bar']/div[@class='app-info'][1]").text
+
+        return node_ip.replace("\"", "").replace(" ", "")
 
     def login_into_aws(self):
         """ Login into AWS
@@ -163,77 +234,12 @@ class SeleniumGithub(unittest.TestCase):
         driver.find_element_by_css_selector("button.getStarted").click()
         driver.find_element_by_css_selector("td[title=\"AmazonEC2FullAccess\"]").click()
         driver.find_element_by_css_selector("button.attach").click()
-        time.sleep(3)
+        # short delay to load javascript functions
+        time.sleep(5)
         driver.find_element_by_css_selector("div.tableField").click()
         driver.find_element_by_css_selector("button.submit").click()
 
         return tutum_access_key_id, tutum_secret_access_key
-
-    def create_tutum_node(self):
-        """ Create a Tutum node based on AWS
-        """
-
-        driver = self.driver
-        # login into tutum
-        self.login_into_tutum()
-        driver.find_element_by_css_selector("li.menu-item.menu-node > a > span.menu-text").click()
-        driver.find_element_by_css_selector("a[href=\"/node/launch/\"]").click()
-        driver.find_element_by_id("node-cluster-name").clear()
-        driver.find_element_by_id("node-cluster-name").send_keys(self.TUTUM_NODE_NAME)
-        time.sleep(2)
-        driver.find_element_by_id("btn-finish-node-cluster").click()
-        # wait for deployement of node
-        time.sleep(2.5 * 60)
-
-    def create_tutum_service(self):
-        """ Create a Tutum service based on the docker container previously built
-        """
-
-        driver = self.driver
-        service_available = False
-        # login into tutum
-        self.login_into_tutum()
-        driver.find_element_by_link_text("Services").click()
-        # first service
-        if driver.find_element_by_link_text("Create your first service").size() > 0:
-            driver.find_element_by_link_text("Create your first service").click()
-            service_available = True
-        # not the first service
-        elif driver.find_element_by_link_text("Create service").size() > 0:
-            driver.find_element_by_link_text("Create service").click()
-            service_available = True
-
-        if service_available:
-            driver.find_element_by_link_text("Public images").click()
-            driver.find_element_by_link_text("Search Docker hub").click()
-            driver.find_element_by_id("search").clear()
-            driver.find_element_by_id("search").send_keys("django-docker-starter")
-            driver.find_element_by_id("search").clear()
-            driver.find_element_by_id("search").send_keys(self.GITHUB_STARTER_REPO_NAME)
-            driver.find_element_by_xpath("//button[@onclick='selectImage(this)']").click()
-            driver.find_element_by_css_selector("div.overlay-message").click()
-            driver.find_element_by_css_selector("input[type=\"checkbox\"]").click()
-            driver.find_element_by_xpath("//div[@id='image-ports-wrapper']/div/div/div/table/tbody/tr/td[4]/span").click()
-            driver.find_element_by_css_selector("input.form-control.input-sm").clear()
-            driver.find_element_by_css_selector("input.form-control.input-sm").send_keys("80")
-            driver.find_element_by_id("step-container").click()
-            driver.find_element_by_id("btn-deploy-services").click()
-
-    def link_aws_account_to_tutum(self, tutum_access_key_id, tutum_secret_access_key):
-        """ Link AWS account to Tutum
-        """
-
-        driver = self.driver
-        # login into tutum
-        self.login_into_tutum()
-        driver.find_element_by_css_selector("span.user-info").click()
-        driver.find_element_by_xpath("//div[@id='navbar-container']/div[2]/ul/li[3]/ul/li/a/i").click()
-        driver.find_element_by_css_selector("div.aws-not-linked > #aws-link").click()
-        driver.find_element_by_id("access-key").clear()
-        driver.find_element_by_id("access-key").send_keys(tutum_access_key_id)
-        driver.find_element_by_id("secret-access-key").clear()
-        driver.find_element_by_id("secret-access-key").send_keys(tutum_secret_access_key)
-        driver.find_element_by_id("aws-save-credentials").click()
 
     def is_element_present(self, how, what):
         try:
