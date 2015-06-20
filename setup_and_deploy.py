@@ -6,7 +6,7 @@ import unittest
 import time
 
 
-class SeleniumGithub(unittest.TestCase):
+class DjangoDockerAWS(unittest.TestCase):
     # GitHub URL
     GITHUB_URL = "https://github.com/"
     # GitHub credentials
@@ -61,6 +61,8 @@ class SeleniumGithub(unittest.TestCase):
         # self.create_tutum_node()
         # create tutum service on Tutum
         app_ip = self.create_tutum_service()
+        # Watch application
+        self.watch_app(app_ip)
 
     def login_into_github(self):
         """ Login into DockerHub
@@ -195,6 +197,14 @@ class SeleniumGithub(unittest.TestCase):
         node_ip = driver.find_element_by_xpath("//div[@class='info-bar']/div[@class='app-info'][1]").text
 
         return node_ip.replace("\"", "").replace(" ", "")
+
+    def watch_app(self, ip):
+        """ Go on node ip to watch application in live
+        """
+
+        driver = self.driver
+        driver.get("http://" + ip)
+        time.sleep(20)
 
     def login_into_aws(self):
         """ Login into AWS
