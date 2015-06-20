@@ -25,6 +25,8 @@ class SeleniumGithub(unittest.TestCase):
     # Tutum credentials
     TUTUM_LOGIN = "developer.mail.no.reply@gmail.com"
     TUTUM_PASSWORD = "euc-dMB-y52-ZQT"
+    # Tutum node
+    TUTUM_NODE_NAME = "django-node"
     # AWS URL
     AWS_URL = "http://aws.amazon.com"
     # AWS credentials
@@ -44,6 +46,7 @@ class SeleniumGithub(unittest.TestCase):
     def test_fork_repository(self):
         """ Login into Github account and fork the "django-docker-started" repository
         """
+
         # go on the `django-docker-starter` GitHub repository and fork repository
         self.fork_github_repo()
         # create automated build repository on DockerHub
@@ -52,6 +55,8 @@ class SeleniumGithub(unittest.TestCase):
         tutum_access_kei_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
         # link AWS account to Tutum
         self.link_aws_account_to_tutum(tutum_access_kei_id, tutum_secret_access_key)
+        # create tutum node on Tutum
+        self.create_tutum_node()
         # create tutum service on Tutum
         self.create_tutum_service()
 
@@ -164,6 +169,22 @@ class SeleniumGithub(unittest.TestCase):
 
         return tutum_access_key_id, tutum_secret_access_key
 
+    def create_tutum_node(self):
+        """ Create a Tutum node based on AWS
+        """
+
+        driver = self.driver
+        # login into tutum
+        self.login_into_tutum()
+        driver.find_element_by_css_selector("li.menu-item.menu-node > a > span.menu-text").click()
+        driver.find_element_by_css_selector("a[href=\"/node/launch/\"]").click()
+        driver.find_element_by_id("node-cluster-name").clear()
+        driver.find_element_by_id("node-cluster-name").send_keys(self.TUTUM_NODE_NAME)
+        time.sleep(2)
+        driver.find_element_by_id("btn-finish-node-cluster").click()
+        # wait for deployement of node
+        time.sleep(2.5 * 60)
+
     def create_tutum_service(self):
         """ Create a Tutum service based on the docker container previously built
         """
@@ -174,7 +195,7 @@ class SeleniumGithub(unittest.TestCase):
         self.login_into_tutum()
         driver.find_element_by_link_text("Services").click()
         # first service
-        if driver.find_element_by_link_text("Create your first service") > 0:
+        if driver.find_element_by_link_text("Create your first service").size() > 0:
             driver.find_element_by_link_text("Create your first service").click()
             service_available = True
         # not the first service
