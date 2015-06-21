@@ -115,7 +115,7 @@ class DjangoDockerAWS(unittest.TestCase):
         # login into DockerHub
         self.login_into_dockerhub()
         # create an automated build repository if it doesn't already exist
-        if not self.is_element_present_by_css_selector("a[href*=\"/u/" + self.DOCKER_HUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "\"]"):
+        if not self.is_element_present_by_css_selector(".row a[href*=\"/u/" + self.DOCKER_HUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "/\"]"):
             driver.find_element_by_link_text("+ Add Repository").click()
             driver.find_element_by_link_text("Automated Build").click()
             driver.find_element_by_link_text("Select").click()
