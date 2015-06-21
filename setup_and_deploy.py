@@ -30,7 +30,7 @@ class DjangoDockerAWS(unittest.TestCase):
     # Tutum service
     TUTUM_SERVICE_NAME = "django-starter-app"
     # AWS URL
-    AWS_URL = "http://aws.amazon.com"
+    AWS_URL = "http://console.aws.amazon.com"
     # AWS credentials
     AWS_LOGIN = "developer.mail.no.reply@gmail.com"
     AWS_PASSWORD = "euc-dMB-y52-ZQT"
@@ -218,14 +218,12 @@ class DjangoDockerAWS(unittest.TestCase):
 
         driver = self.driver
         driver.get(self.AWS_URL)
-        driver.find_element_by_css_selector("[data-dropdown=\"aws-nav-dropdown-account\"]").click()
-        driver.find_element_by_css_selector("[data-dropdown=\"aws-nav-dropdown-account\"]").click()
-        driver.find_element_by_link_text("AWS Management Console").click()
-        driver.find_element_by_id("ap_email").clear()
-        driver.find_element_by_id("ap_email").send_keys(self.AWS_LOGIN)
-        driver.find_element_by_id("ap_password").clear()
-        driver.find_element_by_id("ap_password").send_keys(self.AWS_PASSWORD)
-        driver.find_element_by_id("signInSubmit-input").click()
+        if self.is_element_present("id", "ap_email") and self.is_element_present("id", "ap_password"):
+            driver.find_element_by_id("ap_email").clear()
+            driver.find_element_by_id("ap_email").send_keys(self.AWS_LOGIN)
+            driver.find_element_by_id("ap_password").clear()
+            driver.find_element_by_id("ap_password").send_keys(self.AWS_PASSWORD)
+            driver.find_element_by_id("signInSubmit-input").click()
 
     def create_tutum_user_on_aws(self):
         """ Create a user (name: tutum) on AWS
@@ -257,6 +255,7 @@ class DjangoDockerAWS(unittest.TestCase):
         return tutum_access_key_id, tutum_secret_access_key
 
     def is_element_present(self, how, what):
+
         try:
             self.driver.find_element(by = how, value = what)
         except NoSuchElementException as e:
