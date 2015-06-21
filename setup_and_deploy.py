@@ -18,7 +18,7 @@ class DjangoDockerAWS(unittest.TestCase):
     # Docker Hub URL
     DOCKER_HUB_URL = "https://hub.docker.com"
     # Docker Hub credentials
-    DOCKER_HUB_LOGIN = "developer.mail.no.reply@gmail.com"
+    DOCKER_HUB_LOGIN = "developerdockernoreply"
     DOCKER_HUB_PASSWORD = "euc-dMB-y52-ZQT"
     # Tutum URL
     TUTUM_URL = "https://www.tutum.co"
@@ -113,15 +113,17 @@ class DjangoDockerAWS(unittest.TestCase):
         driver = self.driver
         # login into DockerHub
         self.login_into_dockerhub()
-        driver.find_element_by_link_text("+ Add Repository").click()
-        driver.find_element_by_link_text("Automated Build").click()
-        driver.find_element_by_link_text("Select").click()
-        driver.find_element_by_link_text("developergithubnoreply").click()
-        driver.find_element_by_css_selector("[href=\"https://registry.hub.docker.com/builds/github/" +
-                                            self.GITHUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "/\"]").click()
-        driver.find_element_by_name("action").click()
-        # Wait during build of container
-        time.sleep(3.2 * 60)
+        # create an automated build repository if it doesn't already exist
+        if not self.is_element_present_by_css_selector("a[href*=\"/u/" + self.DOCKER_HUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "\"]"):
+            driver.find_element_by_link_text("+ Add Repository").click()
+            driver.find_element_by_link_text("Automated Build").click()
+            driver.find_element_by_link_text("Select").click()
+            driver.find_element_by_link_text("developergithubnoreply").click()
+            driver.find_element_by_css_selector("[href=\"https://registry.hub.docker.com/builds/github/" +
+                                                self.GITHUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "/\"]").click()
+            driver.find_element_by_name("action").click()
+            # Wait during build of container
+            time.sleep(3.2 * 60)
 
     def login_into_tutum(self):
         """ Login into Tutum
