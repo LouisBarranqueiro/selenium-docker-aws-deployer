@@ -85,8 +85,11 @@ class DjangoDockerAWS(unittest.TestCase):
         driver = self.driver
         # login into GitHub
         self.login_into_github()
-        driver.get(self.GITHUB_STARTER_REPO_URL)
-        driver.find_element_by_xpath("//button[@type='submit']").click()
+        driver.find_element_by_css_selector("a.repo-filter[data-filter=\".fork\"]").click()
+        # fork the `django-docker-starter` repository if it's not the case
+        if not self.is_element_present_by_css_selector(".repo-and-owner[title=*\"" + self.GITHUB_STARTER_REPO_NAME + "\""):
+            driver.get(self.GITHUB_STARTER_REPO_URL)
+            driver.find_element_by_xpath("//button[@type='submit']").click()
 
     def login_into_dockerhub(self):
         """ Login into Docker Hub
