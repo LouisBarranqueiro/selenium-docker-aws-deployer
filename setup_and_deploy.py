@@ -92,13 +92,14 @@ class DjangoDockerAWS(unittest.TestCase):
         """ Login into Docker Hub
         """
         driver = self.driver
-        driver.get(self.DOCKER_HUB_URL + "/account/signup/")
-        driver.find_element_by_link_text("Log In").click()
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(self.DOCKER_HUB_LOGIN)
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(self.DOCKER_HUB_PASSWORD)
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.get(self.DOCKER_HUB_URL)
+        if self.is_element_present_by_css_selector("a[href=\"/account/login/\"]"):
+            driver.find_element_by_css_selector("a[href=\"/account/login/\"]").click()
+            driver.find_element_by_id("id_username").clear()
+            driver.find_element_by_id("id_username").send_keys(self.DOCKER_HUB_LOGIN)
+            driver.find_element_by_id("id_password").clear()
+            driver.find_element_by_id("id_password").send_keys(self.DOCKER_HUB_PASSWORD)
+            driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
     def create_dockerhub_build_repo(self):
         """
