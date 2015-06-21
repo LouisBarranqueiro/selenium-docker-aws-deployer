@@ -146,13 +146,15 @@ class DjangoDockerAWS(unittest.TestCase):
         self.login_into_tutum()
         driver.find_element_by_css_selector("span.user-info").click()
         driver.find_element_by_xpath("//div[@id='navbar-container']/div[2]/ul/li[3]/ul/li/a/i").click()
-        driver.find_element_by_css_selector("div.aws-not-linked > #aws-link").click()
-        driver.find_element_by_id("access-key").clear()
-        driver.find_element_by_id("access-key").send_keys(tutum_access_key_id)
-        driver.find_element_by_id("secret-access-key").clear()
-        driver.find_element_by_id("secret-access-key").send_keys(tutum_secret_access_key)
-        driver.find_element_by_id("aws-save-credentials").click()
-        time.sleep(5)
+        # link AWS account if there is no one
+        if self.is_element_present_by_css_selector("div.aws-not-linked > #aws-link"):
+            driver.find_element_by_css_selector("div.aws-not-linked > #aws-link").click()
+            driver.find_element_by_id("access-key").clear()
+            driver.find_element_by_id("access-key").send_keys(tutum_access_key_id)
+            driver.find_element_by_id("secret-access-key").clear()
+            driver.find_element_by_id("secret-access-key").send_keys(tutum_secret_access_key)
+            driver.find_element_by_id("aws-save-credentials").click()
+            time.sleep(5)
 
     def create_tutum_node(self):
         """ Create a Tutum node based on AWS
@@ -238,25 +240,34 @@ class DjangoDockerAWS(unittest.TestCase):
         driver = self.driver
         # login into AWS
         self.login_into_aws()
-        driver.find_element_by_xpath("//div[@id='serviceColumn2']/div/div/a[2]/div[2]").click()
+        driver.find_element_by_xpath("a.service[data-service-id=\"iam\"]").click()
         driver.find_element_by_link_text("Users").click()
-        driver.find_element_by_xpath("//div[@id='c']/div[2]/div[2]/div/div/div/button").click()
-        driver.find_element_by_css_selector("li > input").clear()
-        driver.find_element_by_css_selector("li > input").send_keys("tutum")
-        driver.find_element_by_xpath("//div[@id='c']/div/div[2]/div/div[2]/div[3]/div/button").click()
-        driver.find_element_by_link_text("Show User Security Credentials").click()
-        # Get information of `tutum` user
-        tutum_access_key_id = driver.find_elements_by_class_name("attrValue")[0].text
-        tutum_secret_access_key = driver.find_elements_by_class_name("attrValue")[1].text
-        # Attach policy (full access to EC2) to `tutum` user
+        # create a `tutum` user if he doesn't exist
+        if self.is_element_present_by_css_selector("td[title=\"tutum\"]"):
+            driver.find_element_by_css_selector("button.create_user").click()
+            driver.find_element_by_css_selector("li > input").clear()
+            driver.find_element_by_css_selector("li > input").send_keys("tutum")
+            driver.find_element_by_xpath("//div[@id='c']/div/div[2]/div/div[2]/div[3]/div/button").click()
+            driver.find_element_by_link_text("Show User Security Credentials").click()
+            # Get information of `tutum` user
+            tutum_access_key_id = driver.find_elements_by_class_name("attrValue")[0].text
+            tutum_secret_access_key = driver.find_elements_by_class_name("attrValue")[1].text
+        else:
+            tutum_access_key_id = None
+            tutum_secret_access_key = None
+
         driver.find_element_by_link_text("Policies").click()
-        driver.find_element_by_css_selector("button.getStarted").click()
+        if self.is_element_present_by_css_selector("button.getStarted"):
+            driver.find_element_by_css_selector("button.getStarted").click()
+
         driver.find_element_by_css_selector("td[title=\"AmazonEC2FullAccess\"]").click()
-        driver.find_element_by_css_selector("button.attach").click()
-        # short delay to load javascript functions
-        time.sleep(5)
-        driver.find_element_by_css_selector("div.tableField").click()
-        driver.find_element_by_css_selector("button.submit").click()
+        # Attach policy (full access to EC2) to `tutum` user if its not
+        if self.is_element_present("text", "tutum"):
+            driver.find_element_by_css_selector("button.attach").click()
+            # short delay to load javascript functions
+            time.sleep(5)
+            driver.find_element_by_css_selector("div.tableField").click()
+            driver.find_element_by_css_selector("button.submit").click()
 
         return tutum_access_key_id, tutum_secret_access_key
 
