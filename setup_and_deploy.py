@@ -54,9 +54,9 @@ class DjangoDockerAWS(unittest.TestCase):
         # create automated build repository on DockerHub
         self.create_dockerhub_build_repo()
         # create `tutum` user on AWS
-        tutum_access_kei_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
+        tutum_access_key_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
         # link AWS account to Tutum
-        self.link_aws_account_to_tutum(tutum_access_kei_id, tutum_secret_access_key)
+        self.link_aws_account_to_tutum(tutum_access_key_id, tutum_secret_access_key)
         # create tutum node on Tutum
         self.create_tutum_node()
         # create tutum service on Tutum
@@ -123,12 +123,14 @@ class DjangoDockerAWS(unittest.TestCase):
         """
         driver = self.driver
         driver.get(self.TUTUM_URL)
+
         driver.find_element_by_link_text("Login").click()
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(self.TUTUM_LOGIN)
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(self.TUTUM_PASSWORD)
-        driver.find_element_by_xpath("//button[@type='submit']").click()
+        if self.is_element_present("id", "id_username"):
+            driver.find_element_by_id("id_username").clear()
+            driver.find_element_by_id("id_username").send_keys(self.TUTUM_LOGIN)
+            driver.find_element_by_id("id_password").clear()
+            driver.find_element_by_id("id_password").send_keys(self.TUTUM_PASSWORD)
+            driver.find_element_by_xpath("//button[@type='submit']").click()
 
     def link_aws_account_to_tutum(self, tutum_access_key_id, tutum_secret_access_key):
         """ Link AWS account to Tutum
@@ -145,6 +147,7 @@ class DjangoDockerAWS(unittest.TestCase):
         driver.find_element_by_id("secret-access-key").clear()
         driver.find_element_by_id("secret-access-key").send_keys(tutum_secret_access_key)
         driver.find_element_by_id("aws-save-credentials").click()
+        time.sleep(5)
 
     def create_tutum_node(self):
         """ Create a Tutum node based on AWS
@@ -153,7 +156,7 @@ class DjangoDockerAWS(unittest.TestCase):
         driver = self.driver
         # login into tutum
         self.login_into_tutum()
-        driver.find_element_by_css_selector("li.menu-item.menu-node > a > span.menu-text").click()
+        driver.find_element_by_css_selector("a[href=\"/node/cluster/list/\"]").click()
         driver.find_element_by_css_selector("a[href=\"/node/launch/\"]").click()
         driver.find_element_by_id("node-cluster-name").clear()
         driver.find_element_by_id("node-cluster-name").send_keys(self.TUTUM_NODE_NAME)
@@ -191,7 +194,7 @@ class DjangoDockerAWS(unittest.TestCase):
         driver.find_element_by_id("step-container").click()
         driver.find_element_by_id("btn-deploy-services").click()
         # short delay to launch the service
-        time.sleep(20)
+        time.sleep(2 * 60)
         driver.find_element_by_css_selector("td.container-link.sortable.renderable > a").click()
         driver.find_element_by_css_selector("#node > a").click()
         driver.execute_script("document.getElementsByClassName('info-bar')[0].getElementsByClassName('icon-link')[0].remove()")
@@ -240,7 +243,6 @@ class DjangoDockerAWS(unittest.TestCase):
         tutum_access_key_id = driver.find_elements_by_class_name("attrValue")[0].text
         tutum_secret_access_key = driver.find_elements_by_class_name("attrValue")[1].text
         # Attach policy (full access to EC2) to `tutum` user
-        driver.get("https://console.aws.amazon.com/iam/home?region=us-west-2")
         driver.find_element_by_link_text("Policies").click()
         driver.find_element_by_css_selector("button.getStarted").click()
         driver.find_element_by_css_selector("td[title=\"AmazonEC2FullAccess\"]").click()
