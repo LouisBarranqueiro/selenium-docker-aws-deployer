@@ -45,7 +45,7 @@ class DjangoDockerAWS(unittest.TestCase):
         self.verificationErrors = []
         self.accept_next_alert = True
 
-    def test_fork_repository(self):
+    def test_deploy_django_docker_app_on_aws(self):
         """ Login into Github account and fork the "django-docker-started" repository
         """
 
@@ -103,8 +103,8 @@ class DjangoDockerAWS(unittest.TestCase):
 
     def create_dockerhub_build_repo(self):
         """
-            Create an automated build repository on DockerHub with the forked repository
-            and wait build of container
+        Create an automated build repository on DockerHub with the forked repository
+        and wait build of container
         """
 
         driver = self.driver
@@ -135,7 +135,10 @@ class DjangoDockerAWS(unittest.TestCase):
             driver.find_element_by_xpath("//button[@type='submit']").click()
 
     def link_aws_account_to_tutum(self, tutum_access_key_id, tutum_secret_access_key):
-        """ Link AWS account to Tutum
+        """
+        Link AWS account to Tutum
+        :param tutum_access_key_id: access key id of AWS tutum user
+        :param tutum_secret_access_key: secret access key of AWS tutum user
         """
 
         driver = self.driver
@@ -205,7 +208,10 @@ class DjangoDockerAWS(unittest.TestCase):
         return node_ip.replace("\"", "").replace(" ", "")
 
     def watch_app(self, ip):
-        """ Go on node ip to watch application in live
+        """
+        Go on node ip to watch application in live
+        :param ip: ip of an application
+        :return:
         """
 
         driver = self.driver
@@ -255,6 +261,12 @@ class DjangoDockerAWS(unittest.TestCase):
         return tutum_access_key_id, tutum_secret_access_key
 
     def is_element_present(self, how, what):
+        """
+        Check if an element exist
+        :param how: how to select it
+        :param what: what to select
+        :return: Boolean
+        """
 
         try:
             self.driver.find_element(by = how, value = what)
@@ -262,36 +274,18 @@ class DjangoDockerAWS(unittest.TestCase):
             return False
         return True
 
-    def is_element_present_by_css_selector(self, element):
+    def is_element_present_by_css_selector(self, css_selector):
+        """
+        Check if an element exist
+        :param css_selector: css selector
+        :return: Boolean
+        """
+
         try:
-            self.driver.find_element_by_css_selector(element)
+            self.driver.find_element_by_css_selector(css_selector)
         except NoSuchElementException as e:
             return False
         return True
-
-    def is_alert_present(self):
-        try:
-            self.driver.switch_to_alert()
-        except NoAlertPresentException as e:
-            return False
-        return True
-
-    def close_alert_and_get_its_text(self):
-        try:
-            alert = self.driver.switch_to_alert()
-            alert_text = alert.text
-            if self.accept_next_alert:
-                alert.accept()
-            else:
-                alert.dismiss()
-            return alert_text
-        finally:
-            self.accept_next_alert = True
-
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
-
 
 if __name__ == "__main__":
     unittest.main()
