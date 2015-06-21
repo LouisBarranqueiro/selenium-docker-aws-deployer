@@ -20,6 +20,8 @@ class DjangoDockerAWS(unittest.TestCase):
     # Docker Hub credentials
     DOCKER_HUB_LOGIN = "developerdockernoreply"
     DOCKER_HUB_PASSWORD = "euc-dMB-y52-ZQT"
+    # Docker Hub repository
+    DOCKER_HUB_REPO_NAME = "django-app-starter"
     # Tutum URL
     TUTUM_URL = "https://www.tutum.co"
     # Tutum credentials
@@ -115,16 +117,24 @@ class DjangoDockerAWS(unittest.TestCase):
         # login into DockerHub
         self.login_into_dockerhub()
         # create an automated build repository if it doesn't already exist
-        if not self.is_element_present_by_css_selector(".row a[href*=\"/u/" + self.DOCKER_HUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "/\"]"):
+        if not self.is_element_present_by_css_selector(".row a[href=\"/u/" + self.DOCKER_HUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "/\"]"):
             driver.find_element_by_link_text("+ Add Repository").click()
             driver.find_element_by_link_text("Automated Build").click()
             driver.find_element_by_link_text("Select").click()
-            driver.find_element_by_link_text("developergithubnoreply").click()
+            driver.find_element_by_link_text(self.GITHUB_LOGIN).click()
             driver.find_element_by_css_selector("[href=\"https://registry.hub.docker.com/builds/github/" +
                                                 self.GITHUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "/\"]").click()
+            driver.find_element_by_id("id_repo_name").clear()
+            driver.find_element_by_id("id_repo_name").send_keys(self.DOCKER_HUB_REPO_NAME)
             driver.find_element_by_name("action").click()
-            # Wait during build of container
-            time.sleep(3.2 * 60)
+            driver.get(self.DOCKER_HUB_URL)
+            # wait during build of container
+            time.sleep(2 * 60)
+
+        # wait until docker image be built
+        while self.is_element_present_by_css_selector(".row a[href=\"/u/" + self.DOCKER_HUB_LOGIN + "/" + self.GITHUB_STARTER_REPO_NAME + "/\"] .status"):
+            time.sleep(15)
+            driver.get(self.DOCKER_HUB_URL)
 
     def login_into_tutum(self):
         """ Login into Tutum
@@ -196,8 +206,13 @@ class DjangoDockerAWS(unittest.TestCase):
         driver.find_element_by_id("search").clear()
         driver.find_element_by_id("search").send_keys("django-docker-starter")
         driver.find_element_by_id("search").clear()
-        driver.find_element_by_id("search").send_keys(self.GITHUB_STARTER_REPO_NAME)
-        driver.find_element_by_css_selector("button[data-image-name*=\"" + self.GITHUB_STARTER_REPO_NAME + "\"]").click()
+        driver.find_element_by_id("search").send_keys(self.DOCKER_HUB_REPO_NAME)
+        # wait until docker image be available
+        while not self.is_element_present_by_css_selector("button[data-image-name*=\"" + self.DOCKER_HUB_REPO_NAME + "\"]"):
+            time.sleep(15)
+            driver.find_element_by_id("search").send_keys(self.DOCKER_HUB_REPO_NAME)
+
+        driver.find_element_by_css_selector("button[data-image-name*=\"" + self.DOCKER_HUB_REPO_NAME + "\"]").click()
         driver.find_element_by_id("app-name").clear()
         driver.find_element_by_id("app-name").send_keys(self.TUTUM_SERVICE_NAME)
         # short delay to load javascript functions
