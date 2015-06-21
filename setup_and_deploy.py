@@ -56,7 +56,8 @@ class DjangoDockerAWS(unittest.TestCase):
         # create `tutum` user on AWS
         tutum_access_key_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
         # link AWS account to Tutum
-        self.link_aws_account_to_tutum(tutum_access_key_id, tutum_secret_access_key)
+        if tutum_access_key_id != None and tutum_secret_access_key != None:
+            self.link_aws_account_to_tutum(tutum_access_key_id, tutum_secret_access_key)
         # create tutum node on Tutum
         self.create_tutum_node()
         # create tutum service on Tutum
@@ -248,7 +249,7 @@ class DjangoDockerAWS(unittest.TestCase):
         driver.find_element_by_css_selector("a.service[data-service-id=\"iam\"]").click()
         driver.find_element_by_link_text("Users").click()
         # create a `tutum` user if he doesn't exist
-        if not self.is_element_present_by_css_selector("td[title=\"tutum\"]"):
+        if not self.is_element_present_by_css_selector("table[data-table=\"resource\"] td[title=\"tutum\"]"):
             driver.find_element_by_css_selector("button.create_user").click()
             driver.find_element_by_css_selector("li > input").clear()
             driver.find_element_by_css_selector("li > input").send_keys("tutum")
