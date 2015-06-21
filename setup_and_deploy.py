@@ -32,8 +32,8 @@ class DjangoDockerAWS(unittest.TestCase):
     # AWS URL
     AWS_URL = "http://console.aws.amazon.com"
     # AWS credentials
-    AWS_LOGIN = "developer.mail.no.reply@gmail.com"
-    AWS_PASSWORD = "euc-dMB-y52-ZQT"
+    AWS_LOGIN = "checkmymofukinresume@gmail.com"
+    AWS_PASSWORD = "rMc-dkS-56g-j3m-!"
 
     def setUp(self):
         """ Setup
@@ -245,10 +245,10 @@ class DjangoDockerAWS(unittest.TestCase):
         driver = self.driver
         # login into AWS
         self.login_into_aws()
-        driver.find_element_by_xpath("a.service[data-service-id=\"iam\"]").click()
+        driver.find_element_by_css_selector("a.service[data-service-id=\"iam\"]").click()
         driver.find_element_by_link_text("Users").click()
         # create a `tutum` user if he doesn't exist
-        if self.is_element_present_by_css_selector("td[title=\"tutum\"]"):
+        if not self.is_element_present_by_css_selector("td[title=\"tutum\"]"):
             driver.find_element_by_css_selector("button.create_user").click()
             driver.find_element_by_css_selector("li > input").clear()
             driver.find_element_by_css_selector("li > input").send_keys("tutum")
@@ -267,7 +267,7 @@ class DjangoDockerAWS(unittest.TestCase):
 
         driver.find_element_by_css_selector("td[title=\"AmazonEC2FullAccess\"]").click()
         # Attach policy (full access to EC2) to `tutum` user if its not
-        if self.is_element_present("text", "tutum"):
+        if not self.is_element_present("text", "tutum"):
             driver.find_element_by_css_selector("button.attach").click()
             # short delay to load javascript functions
             time.sleep(5)
