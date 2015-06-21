@@ -170,14 +170,17 @@ class DjangoDockerAWS(unittest.TestCase):
         # login into tutum
         self.login_into_tutum()
         driver.find_element_by_css_selector("a[href=\"/node/cluster/list/\"]").click()
-        driver.find_element_by_css_selector("a[href=\"/node/launch/\"]").click()
-        driver.find_element_by_id("node-cluster-name").clear()
-        driver.find_element_by_id("node-cluster-name").send_keys(self.TUTUM_NODE_NAME)
-        # short delay to load javascript functions
         time.sleep(5)
-        driver.find_element_by_id("btn-finish-node-cluster").click()
-        # wait for deployement of node
-        time.sleep(2.5 * 60)
+        # create a node if it doesn't exist
+        if not self.is_element_present_by_link_text(self.TUTUM_NODE_NAME):
+            driver.find_element_by_css_selector("a[href=\"/node/launch/\"]").click()
+            driver.find_element_by_id("node-cluster-name").clear()
+            driver.find_element_by_id("node-cluster-name").send_keys(self.TUTUM_NODE_NAME)
+            # short delay to load javascript functions
+            time.sleep(5)
+            driver.find_element_by_id("btn-finish-node-cluster").click()
+            # wait for deployement of node
+            time.sleep(2.5 * 60)
 
     def create_tutum_service(self):
         """ Create a Tutum service based on the docker container previously built
@@ -293,13 +296,26 @@ class DjangoDockerAWS(unittest.TestCase):
 
     def is_element_present_by_css_selector(self, css_selector):
         """
-        Check if an element exist
+        Check if an element exist by css selector
         :param css_selector: css selector
         :return: Boolean
         """
 
         try:
             self.driver.find_element_by_css_selector(css_selector)
+        except NoSuchElementException as e:
+            return False
+        return True
+
+    def is_element_present_by_link_text(self, link_text):
+        """
+        Check if an element exist by link text
+        :param link_text: link text
+        :return: Boolean
+        """
+
+        try:
+            self.driver.find_element_by_link_text(link_text)
         except NoSuchElementException as e:
             return False
         return True
