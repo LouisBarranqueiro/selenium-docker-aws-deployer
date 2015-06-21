@@ -70,12 +70,13 @@ class DjangoDockerAWS(unittest.TestCase):
 
         driver = self.driver
         driver.get(self.GITHUB_URL)
-        driver.find_element_by_link_text("Sign in").click()
-        driver.find_element_by_id("login_field").clear()
-        driver.find_element_by_id("login_field").send_keys(self.GITHUB_LOGIN)
-        driver.find_element_by_id("password").clear()
-        driver.find_element_by_id("password").send_keys(self.GITHUB_PASSWORD)
-        driver.find_element_by_name("commit").click()
+        if self.is_element_present_by_css_selector("a[href=\"/login\"]"):
+            driver.find_element_by_css_selector("a[href=\"/login\"]").click()
+            driver.find_element_by_id("login_field").clear()
+            driver.find_element_by_id("login_field").send_keys(self.GITHUB_LOGIN)
+            driver.find_element_by_id("password").clear()
+            driver.find_element_by_id("password").send_keys(self.GITHUB_PASSWORD)
+            driver.find_element_by_name("commit").click()
 
     def fork_github_repo(self):
         """ Fork the `django-docker-starter`
@@ -257,6 +258,13 @@ class DjangoDockerAWS(unittest.TestCase):
     def is_element_present(self, how, what):
         try:
             self.driver.find_element(by = how, value = what)
+        except NoSuchElementException as e:
+            return False
+        return True
+
+    def is_element_present_by_css_selector(self, element):
+        try:
+            self.driver.find_element_by_css_selector(element)
         except NoSuchElementException as e:
             return False
         return True
