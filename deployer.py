@@ -79,7 +79,6 @@ class AWSDeployer(object):
         """ Fork the `django-docker-starter`
         """
 
-
         driver = self.driver
         # login into GitHub
         self.login_into_github()
@@ -87,9 +86,9 @@ class AWSDeployer(object):
         # fork the `django-docker-starter` repository if it's not the case
         if not self.is_element_present_by_css_selector("#repo_listing .fork a[href=\"/" + self.config["gitHub"]["credentials"]["name"] + "/" + self.config["gitHub"]["starterRepository"][
             "name"] + "\"]"):
-            self.__logger.debug("Repository forked")
             driver.get(self.config["gitHub"]["url"] + self.config["gitHub"]["starterRepository"]["owner"] + "/" + self.config["gitHub"]["starterRepository"]["name"] + ".git")
             driver.find_element_by_xpath("//button[@type='submit']").click()
+            self.__logger.debug("Repository successfully forked")
         else:
             self.__logger.debug("Repository already forked")
 
@@ -139,7 +138,7 @@ class AWSDeployer(object):
             driver.find_element_by_name("action").click()
             # wait during initialization of container
             driver.get(self.config["dockerHub"]["url"])
-            self.__logger.debug("Automated build repository created")
+            self.__logger.debug("Automated build repository successfully created")
         else:
             self.__logger.debug("Automated build repository already created")
 
@@ -150,9 +149,10 @@ class AWSDeployer(object):
     def login_into_tutum(self):
         """ Login into Tutum
         """
+
         driver = self.driver
         driver.get(self.config["tutum"]["url"])
-
+        self.__logger.debug("Logging into Tutum...")
         driver.find_element_by_link_text("Login").click()
         if self.is_element_present("id", "id_username"):
             driver.find_element_by_id("id_username").clear()
@@ -160,6 +160,9 @@ class AWSDeployer(object):
             driver.find_element_by_id("id_password").clear()
             driver.find_element_by_id("id_password").send_keys(self.config["tutum"]["credentials"]["password"])
             driver.find_element_by_xpath("//button[@type='submit']").click()
+            self.__logger.debug("Logged into Tutum")
+        else:
+            self.__logger.debug("Already logged into Tutum")
 
     def link_aws_account_to_tutum(self, tutum_access_key_id, tutum_secret_access_key):
         """
@@ -171,6 +174,7 @@ class AWSDeployer(object):
         driver = self.driver
         # login into tutum
         self.login_into_tutum()
+        self.__logger.debug("Linking AWS account on Tutum...")
         driver.find_element_by_css_selector("span.user-info").click()
         driver.find_element_by_xpath("//div[@id='navbar-container']/div[2]/ul/li[3]/ul/li/a/i").click()
         # link AWS account if there is no one
@@ -182,6 +186,10 @@ class AWSDeployer(object):
             driver.find_element_by_id("secret-access-key").send_keys(tutum_secret_access_key)
             driver.find_element_by_id("aws-save-credentials").click()
             time.sleep(5)
+            self.__logger.debug("AWS account successfully linked")
+        else:
+            self.__logger.debug("AWS account already linked")
+
 
     def create_tutum_node(self):
         """ Create a Tutum node based on AWS
@@ -190,6 +198,7 @@ class AWSDeployer(object):
         driver = self.driver
         # login into tutum
         self.login_into_tutum()
+        self.__logger.debug("Creating node cluster on Tutum...")
         driver.find_element_by_css_selector("a[href=\"/node/cluster/list/\"]").click()
         time.sleep(5)
         # create a node if it doesn't exist
@@ -200,10 +209,15 @@ class AWSDeployer(object):
             # short delay to load javascript functions
             time.sleep(5)
             driver.find_element_by_id("btn-finish-node-cluster").click()
+            self.__logger.debug("Cluster node successfully created")
 
-            # wait until docker image be built
+            # wait until cluster node be deployed
             while not self._is_visible(".main-container-inner .status-container .status .green"):
                 pass
+            self.__logger.debug("Cluster node successfully deployed")
+        else:
+            self.__logger.debug("Cluster node already created")
+
 
     def create_tutum_service(self):
         """ Create a Tutum service based on the docker container previously built
@@ -212,6 +226,8 @@ class AWSDeployer(object):
         driver = self.driver
         # login into Tutum
         self.login_into_tutum()
+        self.__logger.debug("Creating service on Tutum...")
+
         driver.find_element_by_link_text("Services").click()
         driver.execute_script("$(\".cluster-link a\").text($(\".cluster-link a\").clone().children().remove().end().text())")
         # create a service if it doesn't exist
@@ -240,10 +256,14 @@ class AWSDeployer(object):
             driver.find_element_by_id("btn-deploy-services").click()
             # short delay to launch the service
             time.sleep(5)
+            self.__logger.debug("Service successfully created")
+            self.__logger.debug("Container is deploying")
             # wait until container is running
             while not self._is_visible("#cluster-status .green"):
                 pass
+            self.__logger.debug("Container successfully deployed and available")
         else:
+            self.__logger.debug("Container already deployed and available")
             driver.find_element_by_link_text(self.config["tutum"]["service"]["name"]).click()
 
         driver.find_element_by_css_selector("td.container-link.sortable.renderable > a").click()
