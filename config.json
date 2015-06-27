@@ -30,7 +30,8 @@
             "name": "django-node"
         },
         "service":     {
-            "name": "django-starter-app"
+            "name": "django-starter-app",
+            "port": "80"
         }
     },
     "aws":       {

@@ -198,7 +198,7 @@ class DjangoDockerAWS(unittest.TestCase):
             driver.find_element_by_css_selector("input[type=\"checkbox\"]").click()
             driver.find_element_by_xpath("//div[@id='image-ports-wrapper']/div/div/div/table/tbody/tr/td[4]/span").click()
             driver.find_element_by_css_selector("input.form-control.input-sm").clear()
-            driver.find_element_by_css_selector("input.form-control.input-sm").send_keys("80")
+            driver.find_element_by_css_selector("input.form-control.input-sm").send_keys(self.config["tutum"]["service"]["port"])
             driver.find_element_by_id("step-container").click()
             driver.find_element_by_id("btn-deploy-services").click()
             # short delay to launch the service
