@@ -176,9 +176,9 @@ class DjangoDockerAWS(unittest.TestCase):
         # login into Tutum
         self.login_into_tutum()
         driver.find_element_by_link_text("Services").click()
-        driver.execute_script("$(\".cluster-link a\").clone().children().remove().end().text()")
+        driver.execute_script("$(\".cluster-link a\").text($(\".cluster-link a\").clone().children().remove().end().text())")
         # create a service if it doesn't exist
-        if not self.is_element_present_by_link_text("\"" + self.config["tutum"]["service"]["name"] + "\""):
+        if not self.is_element_present_by_link_text(self.config["tutum"]["service"]["name"]):
             driver.find_element_by_css_selector("a[href=\"/container/launch/\"]").click()
             driver.find_element_by_link_text("Public images").click()
             driver.find_element_by_link_text("Search Docker hub").click()
