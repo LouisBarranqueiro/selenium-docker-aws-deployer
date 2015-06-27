@@ -13,7 +13,7 @@ import time
 class DjangoDockerAWS(unittest.TestCase):
 
     def setUp(self):
-        """ Read json config file
+        """ Init driver and read json config file
         """
 
         self.driver = webdriver.Firefox()
