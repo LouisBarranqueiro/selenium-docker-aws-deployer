@@ -11,10 +11,23 @@ import time
 import logging
 
 class AWSDeployer(object):
+
+    __logger = None
+
     def __init__(self):
         """ Init driver and read json config file
         """
 
+        # init logger
+        self.__logger = logging.getLogger("Deployer")
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG)
+        logger_formatter = logging.Formatter("%(asctime)s - %(name)s - "
+                                             "%(levelname)s - %(message)s", "%m/%d/%Y %I:%M:%S %p")
+        console_handler.setFormatter(logger_formatter)
+        self.__logger.addHandler(console_handler)
+        self.__logger.setLevel(logging.DEBUG)
+        # init web driver
         self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(30)
         self.verificationErrors = []
