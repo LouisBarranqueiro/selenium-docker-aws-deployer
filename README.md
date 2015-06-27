@@ -1,13 +1,3 @@
 # selenium-docker-to-aws
-A Django application deployed with Docker and Tutum on AWS
+A python script to deploy your app bundled in a docker container via Tutum on AWS
 
-
-## identifiants
-### gmail
-- Nom utilisé : Marc Frizeli
-- login : developer.mail.no.reply@gmail.com
-- pw : euc-dMB-y52-ZQT
-
-### Tutum.co  
-- login : developer.mail.no.reply@gmail.com
-- pw : euc-dMB-y52-ZQT
