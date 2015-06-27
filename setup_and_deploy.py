@@ -102,6 +102,8 @@ class DjangoDockerAWS(unittest.TestCase):
                                                 self.config["gitHub"]["credentials"]["name"] + "/" + self.config["gitHub"]["starterRepository"]["name"] + "/\"]").click()
             driver.find_element_by_id("id_repo_name").clear()
             driver.find_element_by_id("id_repo_name").send_keys(self.config["dockerHub"]["repository"]["name"])
+            if self.config["dockerHub"]["repository"]["visibility"] == "private":
+                driver.find_element_by_id("id_repo_visibility_1").click()
             driver.find_element_by_name("action").click()
             # wait during initialization of container
             driver.get(self.config["dockerHub"]["url"])

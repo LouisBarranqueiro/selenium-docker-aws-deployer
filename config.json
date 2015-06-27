@@ -1,6 +1,6 @@
 {
     "gitHub":    {
-        "url":              "https://github.com/",
+        "url":               "https://github.com/",
         "credentials":       {
             "name":     "",
             "password": ""
@@ -11,19 +11,20 @@
         }
     },
     "dockerHub": {
-        "url":        "https://hub.docker.com/",
+        "url":         "https://hub.docker.com/",
         "credentials": {
             "name":     "",
             "password": ""
         },
         "repository":  {
-            "name": "django-app-starter"
+            "name":       "django-app-starter",
+            "visibility": "private"
         }
     },
     "tutum":     {
-        "url":        "https://www.tutum.co/",
+        "url":         "https://www.tutum.co/",
         "credentials": {
-            "email":     "",
+            "email":    "",
             "password": ""
         },
         "node":        {
@@ -35,9 +36,9 @@
         }
     },
     "aws":       {
-        "url":        "http://console.aws.amazon.com/",
+        "url":         "http://console.aws.amazon.com/",
         "credentials": {
-            "email":     "",
+            "email":    "",
             "password": ""
         }
     }
