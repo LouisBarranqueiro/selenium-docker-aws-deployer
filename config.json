@@ -1,0 +1,43 @@
+{
+    "gitHub":    {
+        "url":              "https://github.com/",
+        "credentials":       {
+            "name":     "",
+            "password": ""
+        },
+        "starterRepository": {
+            "name":  "django-docker-starter",
+            "owner": "lbsb"
+        }
+    },
+    "dockerHub": {
+        "url":        "https://hub.docker.com/",
+        "credentials": {
+            "name":     "",
+            "password": ""
+        },
+        "repository":  {
+            "name": "django-app-starter"
+        }
+    },
+    "tutum":     {
+        "url":        "https://www.tutum.co/",
+        "credentials": {
+            "email":     "",
+            "password": ""
+        },
+        "node":        {
+            "name": "django-node"
+        },
+        "service":     {
+            "name": "django-starter-app"
+        }
+    },
+    "aws":       {
+        "url":        "http://console.aws.amazon.com/",
+        "credentials": {
+            "email":     "",
+            "password": ""
+        }
+    }
+}
