@@ -8,11 +8,10 @@ import selenium.webdriver.support.expected_conditions as EC
 import selenium.webdriver.support.ui as ui
 import unittest
 import time
+import logging
 
-
-class DjangoDockerAWS(unittest.TestCase):
-
-    def setUp(self):
+class AWSDeployer(object):
+    def __init__(self):
         """ Init driver and read json config file
         """
 
@@ -24,8 +23,8 @@ class DjangoDockerAWS(unittest.TestCase):
         # read config file
         with open("config.json") as file:
             self.config = json.load(file)
-    
-    def test_deploy_django_docker_app_on_aws(self):
+
+    def launch_deployement(self):
         """ Login into Github account and fork the "django-docker-started" repository
         """
 
@@ -44,7 +43,7 @@ class DjangoDockerAWS(unittest.TestCase):
         app_ip = self.create_tutum_service()
         # Watch application
         self.watch_app(app_ip)
-    
+
     def login_into_github(self):
         """ Login into DockerHub
         """
@@ -62,12 +61,13 @@ class DjangoDockerAWS(unittest.TestCase):
     def fork_github_repo(self):
         """ Fork the `django-docker-starter`
         """
-        
+
         driver = self.driver
         # login into GitHub
         self.login_into_github()
         # fork the `django-docker-starter` repository if it's not the case
-        if not self.is_element_present_by_css_selector("#repo_listing .fork a[href=\"/" + self.config["gitHub"]["credentials"]["name"] + "/" + self.config["gitHub"]["starterRepository"]["name"] + "\"]"):
+        if not self.is_element_present_by_css_selector("#repo_listing .fork a[href=\"/" + self.config["gitHub"]["credentials"]["name"] + "/" + self.config["gitHub"]["starterRepository"][
+            "name"] + "\"]"):
             driver.get(self.config["gitHub"]["url"] + self.config["gitHub"]["starterRepository"]["owner"] + "/" + self.config["gitHub"]["starterRepository"]["name"] + ".git")
             driver.find_element_by_xpath("//button[@type='submit']").click()
 
@@ -94,7 +94,8 @@ class DjangoDockerAWS(unittest.TestCase):
         # login into DockerHub
         self.login_into_dockerhub()
         # create an automated build repository if it doesn't already exist
-        if not self.is_element_present_by_css_selector("#rightcol .row a[href=\"/u/" + self.config["dockerHub"]["credentials"]["name"] + "/" + self.config["dockerHub"]["repository"]["name"] + "/\"]"):
+        if not self.is_element_present_by_css_selector("#rightcol .row a[href=\"/u/" + self.config["dockerHub"]["credentials"]["name"] + "/" + self.config["dockerHub"]["repository"][
+            "name"] + "/\"]"):
             driver.get(self.config["dockerHub"]["url"] + "/builds/add/")
             driver.find_element_by_css_selector(".content .add-build .github a[href=\"/builds/github/select/\"]").click()
             driver.find_element_by_link_text(self.config["gitHub"]["credentials"]["name"]).click()
@@ -102,8 +103,10 @@ class DjangoDockerAWS(unittest.TestCase):
                                                 self.config["gitHub"]["credentials"]["name"] + "/" + self.config["gitHub"]["starterRepository"]["name"] + "/\"]").click()
             driver.find_element_by_id("id_repo_name").clear()
             driver.find_element_by_id("id_repo_name").send_keys(self.config["dockerHub"]["repository"]["name"])
+            # change visibility of repository
             if self.config["dockerHub"]["repository"]["visibility"] == "private":
                 driver.find_element_by_id("id_repo_visibility_1").click()
+
             driver.find_element_by_name("action").click()
             # wait during initialization of container
             driver.get(self.config["dockerHub"]["url"])
@@ -326,7 +329,3 @@ class DjangoDockerAWS(unittest.TestCase):
             return True
         except TimeoutException:
             return False
-
-
-if __name__ == "__main__":
-    unittest.main()
