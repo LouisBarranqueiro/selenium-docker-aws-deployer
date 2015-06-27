@@ -61,6 +61,7 @@ class AWSDeployer(object):
         """ Login into DockerHub
         """
 
+        self.__logger.debug("Logging into GitHub...")
         driver = self.driver
         driver.get(self.config["gitHub"]["url"])
         if self.is_element_present_by_css_selector("a[href=\"/login\"]"):
@@ -70,23 +71,34 @@ class AWSDeployer(object):
             driver.find_element_by_id("password").clear()
             driver.find_element_by_id("password").send_keys(self.config["gitHub"]["credentials"]["password"])
             driver.find_element_by_name("commit").click()
+            self.__logger.debug("Logged into GitHub")
+        else:
+            self.__logger.debug("Already logged into GitHub")
 
     def fork_github_repo(self):
         """ Fork the `django-docker-starter`
         """
 
+
         driver = self.driver
         # login into GitHub
         self.login_into_github()
+        self.__logger.debug("forking repository : %s/%s ...", self.config["gitHub"]['starterRepository']["owner"], self.config["gitHub"]['starterRepository']["owner"])
         # fork the `django-docker-starter` repository if it's not the case
         if not self.is_element_present_by_css_selector("#repo_listing .fork a[href=\"/" + self.config["gitHub"]["credentials"]["name"] + "/" + self.config["gitHub"]["starterRepository"][
             "name"] + "\"]"):
+            self.__logger.debug("Repository forked")
             driver.get(self.config["gitHub"]["url"] + self.config["gitHub"]["starterRepository"]["owner"] + "/" + self.config["gitHub"]["starterRepository"]["name"] + ".git")
             driver.find_element_by_xpath("//button[@type='submit']").click()
+        else:
+            self.__logger.debug("Repository already forked")
 
     def login_into_dockerhub(self):
         """ Login into Docker Hub
         """
+
+        self.__logger.debug("Logging into DockerHub...")
+
         driver = self.driver
         driver.get(self.config["dockerHub"]["url"])
         if self.is_element_present_by_css_selector("a[href=\"/account/login/\"]"):
@@ -96,6 +108,9 @@ class AWSDeployer(object):
             driver.find_element_by_id("id_password").clear()
             driver.find_element_by_id("id_password").send_keys(self.config["dockerHub"]["credentials"]["password"])
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            self.__logger.debug("Logged into DockerHub")
+        else:
+            self.__logger.debug("Already logger into GitHub")
 
     def create_dockerhub_build_repo(self):
         """
@@ -106,6 +121,7 @@ class AWSDeployer(object):
         driver = self.driver
         # login into DockerHub
         self.login_into_dockerhub()
+        self.__logger.debug("Creating automated build repository on DockerHub...")
         # create an automated build repository if it doesn't already exist
         if not self.is_element_present_by_css_selector("#rightcol .row a[href=\"/u/" + self.config["dockerHub"]["credentials"]["name"] + "/" + self.config["dockerHub"]["repository"][
             "name"] + "/\"]"):
@@ -123,6 +139,9 @@ class AWSDeployer(object):
             driver.find_element_by_name("action").click()
             # wait during initialization of container
             driver.get(self.config["dockerHub"]["url"])
+            self.__logger.debug("Automated build repository created")
+        else:
+            self.__logger.debug("Automated build repository already created")
 
             # wait until docker image be built
             # while not self._is_visible("#rightcol .row a[href=\"/u/" + self.config["dockerHub"]["credentials"]["name"] + "/" + self.config["dockerHub"]["repository"]["name"] + "/\"] .stars-and-downloads-container"):
