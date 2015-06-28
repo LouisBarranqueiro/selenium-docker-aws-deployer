@@ -65,7 +65,9 @@ class AWSDeployer(object):
         self.watch_app(app_ip)
         finished_at = datetime.now().strftime('%H%M%S')
         duration = datetime.strptime(finished_at, "%H%M%S") - datetime.strptime(started_at, "%H%M%S")
-        self.__logger.debug("Application successfully deployed in %d minutes and %d seconds" % (((duration.seconds % 3600) // 60), duration.seconds % 60))
+        self.__logger.debug("Application successfully deployed in %d minutes and %d seconds"
+                            % (((duration.seconds % 3600) // 60), duration.seconds % 60))
+
     def login_into_github(self):
         """ Login into DockerHub
         """
@@ -91,11 +93,15 @@ class AWSDeployer(object):
         driver = self.driver
         # login into GitHub
         self.login_into_github()
-        self.__logger.debug("forking repository : %s/%s ..." %  (self.__config["gitHub"]['starterRepository']["owner"], self.__config["gitHub"]['starterRepository']["owner"]))
+        self.__logger.debug("forking repository : %s/%s..."
+                            % (self.__config["gitHub"]['starterRepository']["owner"],
+                               self.__config["gitHub"]['starterRepository']["owner"]))
         # fork the GitHub starter repository if it's not the case
-        if not self.is_element_present_by_css_selector("#repo_listing .fork a[href=\"/" + self.__config["gitHub"]["credentials"]["name"] + "/" + self.__config["gitHub"]["starterRepository"][
-            "name"] + "\"]"):
-            driver.get(self.__config["gitHub"]["url"] + self.__config["gitHub"]["starterRepository"]["owner"] + "/" + self.__config["gitHub"]["starterRepository"]["name"] + ".git")
+        if not self.is_element_present_by_css_selector("#repo_listing .fork a[href=\"/%s/%s\"]"
+                                                       % (self.__config["gitHub"]["credentials"]["name"],
+                                                          self.__config["gitHub"]["starterRepository"]["name"])):
+            driver.get("%s/%s.git" % (self.__config["gitHub"]["url"] + self.__config["gitHub"]["starterRepository"]["owner"],
+                                      self.__config["gitHub"]["starterRepository"]["name"]))
             driver.find_element_by_xpath("//button[@type='submit']").click()
             self.__logger.debug("Repository successfully forked")
         else:
@@ -129,13 +135,15 @@ class AWSDeployer(object):
         self.login_into_dockerhub()
         self.__logger.debug("Creating automated build repository on DockerHub...")
         # create an automated build repository if it doesn't already exist
-        if not self.is_element_present_by_css_selector("#rightcol .row a[href=\"/u/" + self.__config["dockerHub"]["credentials"]["name"] + "/" + self.__config["dockerHub"]["repository"][
-            "name"] + "/\"]"):
+        if not self.is_element_present_by_css_selector("#rightcol .row a[href=\"/u/%s/%s/\"]"
+                                                               % (self.__config["dockerHub"]["credentials"]["name"],
+                                                                  self.__config["dockerHub"]["repository"]["name"])):
             driver.get(self.__config["dockerHub"]["url"] + "/builds/add/")
             driver.find_element_by_css_selector(".content .add-build .github a[href=\"/builds/github/select/\"]").click()
             driver.find_element_by_link_text(self.__config["gitHub"]["credentials"]["name"]).click()
-            driver.find_element_by_css_selector("[href=\"https://registry.hub.docker.com/builds/github/" +
-                                                self.__config["gitHub"]["credentials"]["name"] + "/" + self.__config["gitHub"]["starterRepository"]["name"] + "/\"]").click()
+            driver.find_element_by_css_selector("[href=\"https://registry.hub.docker.com/builds/github/%s/%s/\"]"
+                                                % (self.__config["gitHub"]["credentials"]["name"],
+                                                   self.__config["gitHub"]["starterRepository"]["name"])).click()
             driver.find_element_by_id("id_repo_name").clear()
             driver.find_element_by_id("id_repo_name").send_keys(self.__config["dockerHub"]["repository"]["name"])
             # change visibility of repository
@@ -150,8 +158,10 @@ class AWSDeployer(object):
             self.__logger.debug("Automated build repository already created")
 
             # wait until docker image be built
-            # while not self._is_visible("#rightcol .row a[href=\"/u/" + self.__config["dockerHub"]["credentials"]["name"] + "/" + self.__config["dockerHub"]["repository"]["name"] + "/\"] .stars-and-downloads-container"):
-            #     driver.get(self.__config["dockerHub"]["url"])
+            # while not self._is_visible("#rightcol .row a[href=\"/u/%s/%s/\"] .stars-and-downloads-container"
+            #                             % (self.__config["dockerHub"]["credentials"]["name"],
+            #                                self.__config["dockerHub"]["repository"]["name"])):
+            #      driver.get(self.__config["dockerHub"]["url"])
 
     def login_into_tutum(self):
         """ Login into Tutum
@@ -232,7 +242,8 @@ class AWSDeployer(object):
         self.__logger.debug("Creating service on Tutum...")
 
         driver.find_element_by_link_text("Services").click()
-        driver.execute_script("$(\".cluster-link a\").text($(\".cluster-link a\").clone().children().remove().end().text())")
+        driver.execute_script("$(\".cluster-link a\").text($(\".cluster-link a\")"
+                              ".clone().children().remove().end().text())")
         # create a service if it doesn't exist
         if not self.is_element_present_by_link_text(self.__config["tutum"]["service"]["name"]):
             driver.find_element_by_css_selector("a[href=\"/container/launch/\"]").click()
@@ -241,11 +252,13 @@ class AWSDeployer(object):
             driver.find_element_by_id("search").clear()
             driver.find_element_by_id("search").send_keys(self.__config["dockerHub"]["repository"]["name"])
             # wait until docker image be available
-            while not self._is_visible("#community-search-result button[data-image-name*=\"" + self.__config["dockerHub"]["repository"]["name"] + "\"]"):
+            while not self._is_visible("#community-search-result button[data-image-name*=\"%s\"]"
+                                               % (self.__config["dockerHub"]["repository"]["name"])):
                 driver.find_element_by_id("search").clear()
                 driver.find_element_by_id("search").send_keys(self.__config["dockerHub"]["repository"]["name"])
 
-            driver.find_element_by_css_selector("button[data-image-name*=\"" + self.__config["dockerHub"]["repository"]["name"] + "\"]").click()
+            driver.find_element_by_css_selector("button[data-image-name*=\"%s\"]"
+                                                % (self.__config["dockerHub"]["repository"]["name"])).click()
             driver.find_element_by_id("app-name").clear()
             driver.find_element_by_id("app-name").send_keys(self.__config["tutum"]["service"]["name"])
             # short delay to load javascript functions
@@ -286,8 +299,8 @@ class AWSDeployer(object):
         """
 
         driver = self.driver
-        self.__logger.debug("Connecting to %s:%s..." %  (ip, self.__config["tutum"]["service"]["port"]))
-        driver.get("http://" + ip + ":" + self.__config["tutum"]["service"]["port"])
+        self.__logger.debug("Connecting to %s:%s..." % (ip, self.__config["tutum"]["service"]["port"]))
+        driver.get("http://%s:%s" % (ip, self.__config["tutum"]["service"]["port"]))
 
     def login_into_aws(self):
         """ Login into AWS
@@ -296,7 +309,8 @@ class AWSDeployer(object):
         driver = self.driver
         driver.get(self.__config["aws"]["url"])
         self.__logger.debug("Logging into AWS...")
-        if self.is_element_present("id", "ap_email") and self.is_element_present("id", "ap_password"):  # check if user is already logger
+        if (self.is_element_present("id", "ap_email") and
+                self.is_element_present("id", "ap_password")):  # check if user is already logger
             driver.find_element_by_id("ap_email").clear()
             driver.find_element_by_id("ap_email").send_keys(self.__config["aws"]["credentials"]["email"])
             driver.find_element_by_id("ap_password").clear()
