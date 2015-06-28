@@ -12,6 +12,7 @@ import logging
 
 class AWSDeployer(object):
     __logger = None
+    __config = None
 
     def __init__(self):
         """ Init driver and read json config file
@@ -31,13 +32,17 @@ class AWSDeployer(object):
         self.driver.implicitly_wait(30)
         self.verificationErrors = []
         self.accept_next_alert = True
-        self.config = None
+
         # read config file
-        with open("config.json") as file:
-            self.config = json.load(file)
+        try:
+            with open("config.json") as file:
+                self.__config = json.load(file)
+        except IOError:
+            self.__logger.debug("Config file not found")
+            exit()
 
     def launch_deployement(self):
-        """ Login into Github account and fork the "django-docker-started" repository
+        """ Login into Github account and fork the starter repository
         """
 
         started_at = time.time()
@@ -66,14 +71,14 @@ class AWSDeployer(object):
         """
 
         driver = self.driver
-        driver.get(self.config["gitHub"]["url"])
+        driver.get(self.__config["gitHub"]["url"])
         self.__logger.debug("Logging into GitHub...")
         if self.is_element_present_by_css_selector("a[href=\"/login\"]"):
             driver.find_element_by_css_selector("a[href=\"/login\"]").click()
             driver.find_element_by_id("login_field").clear()
-            driver.find_element_by_id("login_field").send_keys(self.config["gitHub"]["credentials"]["name"])
+            driver.find_element_by_id("login_field").send_keys(self.__config["gitHub"]["credentials"]["name"])
             driver.find_element_by_id("password").clear()
-            driver.find_element_by_id("password").send_keys(self.config["gitHub"]["credentials"]["password"])
+            driver.find_element_by_id("password").send_keys(self.__config["gitHub"]["credentials"]["password"])
             driver.find_element_by_name("commit").click()
             self.__logger.debug("Successfully Logged into GitHub")
         else:
@@ -86,11 +91,11 @@ class AWSDeployer(object):
         driver = self.driver
         # login into GitHub
         self.login_into_github()
-        self.__logger.debug("forking repository : %s/%s ...", self.config["gitHub"]['starterRepository']["owner"], self.config["gitHub"]['starterRepository']["owner"])
+        self.__logger.debug("forking repository : %s/%s ...", self.__config["gitHub"]['starterRepository']["owner"], self.__config["gitHub"]['starterRepository']["owner"])
         # fork the `django-docker-starter` repository if it's not the case
-        if not self.is_element_present_by_css_selector("#repo_listing .fork a[href=\"/" + self.config["gitHub"]["credentials"]["name"] + "/" + self.config["gitHub"]["starterRepository"][
+        if not self.is_element_present_by_css_selector("#repo_listing .fork a[href=\"/" + self.__config["gitHub"]["credentials"]["name"] + "/" + self.__config["gitHub"]["starterRepository"][
             "name"] + "\"]"):
-            driver.get(self.config["gitHub"]["url"] + self.config["gitHub"]["starterRepository"]["owner"] + "/" + self.config["gitHub"]["starterRepository"]["name"] + ".git")
+            driver.get(self.__config["gitHub"]["url"] + self.__config["gitHub"]["starterRepository"]["owner"] + "/" + self.__config["gitHub"]["starterRepository"]["name"] + ".git")
             driver.find_element_by_xpath("//button[@type='submit']").click()
             self.__logger.debug("Repository successfully forked")
         else:
@@ -101,14 +106,14 @@ class AWSDeployer(object):
         """
 
         driver = self.driver
-        driver.get(self.config["dockerHub"]["url"])
+        driver.get(self.__config["dockerHub"]["url"])
         self.__logger.debug("Logging into DockerHub...")
         if self.is_element_present_by_css_selector("a[href=\"/account/login/\"]"):
             driver.find_element_by_css_selector("a[href=\"/account/login/\"]").click()
             driver.find_element_by_id("id_username").clear()
-            driver.find_element_by_id("id_username").send_keys(self.config["dockerHub"]["credentials"]["name"])
+            driver.find_element_by_id("id_username").send_keys(self.__config["dockerHub"]["credentials"]["name"])
             driver.find_element_by_id("id_password").clear()
-            driver.find_element_by_id("id_password").send_keys(self.config["dockerHub"]["credentials"]["password"])
+            driver.find_element_by_id("id_password").send_keys(self.__config["dockerHub"]["credentials"]["password"])
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
             self.__logger.debug("Successfully logged into DockerHub")
         else:
@@ -125,43 +130,43 @@ class AWSDeployer(object):
         self.login_into_dockerhub()
         self.__logger.debug("Creating automated build repository on DockerHub...")
         # create an automated build repository if it doesn't already exist
-        if not self.is_element_present_by_css_selector("#rightcol .row a[href=\"/u/" + self.config["dockerHub"]["credentials"]["name"] + "/" + self.config["dockerHub"]["repository"][
+        if not self.is_element_present_by_css_selector("#rightcol .row a[href=\"/u/" + self.__config["dockerHub"]["credentials"]["name"] + "/" + self.__config["dockerHub"]["repository"][
             "name"] + "/\"]"):
-            driver.get(self.config["dockerHub"]["url"] + "/builds/add/")
+            driver.get(self.__config["dockerHub"]["url"] + "/builds/add/")
             driver.find_element_by_css_selector(".content .add-build .github a[href=\"/builds/github/select/\"]").click()
-            driver.find_element_by_link_text(self.config["gitHub"]["credentials"]["name"]).click()
+            driver.find_element_by_link_text(self.__config["gitHub"]["credentials"]["name"]).click()
             driver.find_element_by_css_selector("[href=\"https://registry.hub.docker.com/builds/github/" +
-                                                self.config["gitHub"]["credentials"]["name"] + "/" + self.config["gitHub"]["starterRepository"]["name"] + "/\"]").click()
+                                                self.__config["gitHub"]["credentials"]["name"] + "/" + self.__config["gitHub"]["starterRepository"]["name"] + "/\"]").click()
             driver.find_element_by_id("id_repo_name").clear()
-            driver.find_element_by_id("id_repo_name").send_keys(self.config["dockerHub"]["repository"]["name"])
+            driver.find_element_by_id("id_repo_name").send_keys(self.__config["dockerHub"]["repository"]["name"])
             # change visibility of repository
-            if self.config["dockerHub"]["repository"]["visibility"] == "private":
+            if self.__config["dockerHub"]["repository"]["visibility"] == "private":
                 driver.find_element_by_id("id_repo_visibility_1").click()
 
             driver.find_element_by_name("action").click()
             # wait during initialization of container
-            driver.get(self.config["dockerHub"]["url"])
+            driver.get(self.__config["dockerHub"]["url"])
             self.__logger.debug("Automated build repository successfully created")
         else:
             self.__logger.debug("Automated build repository already created")
 
             # wait until docker image be built
-            # while not self._is_visible("#rightcol .row a[href=\"/u/" + self.config["dockerHub"]["credentials"]["name"] + "/" + self.config["dockerHub"]["repository"]["name"] + "/\"] .stars-and-downloads-container"):
-            #     driver.get(self.config["dockerHub"]["url"])
+            # while not self._is_visible("#rightcol .row a[href=\"/u/" + self.__config["dockerHub"]["credentials"]["name"] + "/" + self.__config["dockerHub"]["repository"]["name"] + "/\"] .stars-and-downloads-container"):
+            #     driver.get(self.__config["dockerHub"]["url"])
 
     def login_into_tutum(self):
         """ Login into Tutum
         """
 
         driver = self.driver
-        driver.get(self.config["tutum"]["url"])
+        driver.get(self.__config["tutum"]["url"])
         self.__logger.debug("Logging into Tutum...")
         driver.find_element_by_link_text("Login").click()
         if self.is_element_present("id", "id_username"):
             driver.find_element_by_id("id_username").clear()
-            driver.find_element_by_id("id_username").send_keys(self.config["tutum"]["credentials"]["email"])
+            driver.find_element_by_id("id_username").send_keys(self.__config["tutum"]["credentials"]["email"])
             driver.find_element_by_id("id_password").clear()
-            driver.find_element_by_id("id_password").send_keys(self.config["tutum"]["credentials"]["password"])
+            driver.find_element_by_id("id_password").send_keys(self.__config["tutum"]["credentials"]["password"])
             driver.find_element_by_xpath("//button[@type='submit']").click()
             self.__logger.debug("Successfully logged into Tutum")
         else:
@@ -204,10 +209,10 @@ class AWSDeployer(object):
         driver.find_element_by_css_selector("a[href=\"/node/cluster/list/\"]").click()
         time.sleep(5)
         # create a node if it doesn't exist
-        if not self.is_element_present_by_link_text(self.config["tutum"]["node"]["name"]):
+        if not self.is_element_present_by_link_text(self.__config["tutum"]["node"]["name"]):
             driver.find_element_by_css_selector("a[href=\"/node/launch/\"]").click()
             driver.find_element_by_id("node-cluster-name").clear()
-            driver.find_element_by_id("node-cluster-name").send_keys(self.config["tutum"]["node"]["name"])
+            driver.find_element_by_id("node-cluster-name").send_keys(self.__config["tutum"]["node"]["name"])
             # short delay to load javascript functions
             time.sleep(5)
             driver.find_element_by_id("btn-finish-node-cluster").click()
@@ -232,27 +237,27 @@ class AWSDeployer(object):
         driver.find_element_by_link_text("Services").click()
         driver.execute_script("$(\".cluster-link a\").text($(\".cluster-link a\").clone().children().remove().end().text())")
         # create a service if it doesn't exist
-        if not self.is_element_present_by_link_text(self.config["tutum"]["service"]["name"]):
+        if not self.is_element_present_by_link_text(self.__config["tutum"]["service"]["name"]):
             driver.find_element_by_css_selector("a[href=\"/container/launch/\"]").click()
             driver.find_element_by_link_text("Public images").click()
             driver.find_element_by_link_text("Search Docker hub").click()
             driver.find_element_by_id("search").clear()
-            driver.find_element_by_id("search").send_keys(self.config["dockerHub"]["repository"]["name"])
+            driver.find_element_by_id("search").send_keys(self.__config["dockerHub"]["repository"]["name"])
             # wait until docker image be available
-            while not self._is_visible("#community-search-result button[data-image-name*=\"" + self.config["dockerHub"]["repository"]["name"] + "\"]"):
+            while not self._is_visible("#community-search-result button[data-image-name*=\"" + self.__config["dockerHub"]["repository"]["name"] + "\"]"):
                 driver.find_element_by_id("search").clear()
-                driver.find_element_by_id("search").send_keys(self.config["dockerHub"]["repository"]["name"])
+                driver.find_element_by_id("search").send_keys(self.__config["dockerHub"]["repository"]["name"])
 
-            driver.find_element_by_css_selector("button[data-image-name*=\"" + self.config["dockerHub"]["repository"]["name"] + "\"]").click()
+            driver.find_element_by_css_selector("button[data-image-name*=\"" + self.__config["dockerHub"]["repository"]["name"] + "\"]").click()
             driver.find_element_by_id("app-name").clear()
-            driver.find_element_by_id("app-name").send_keys(self.config["tutum"]["service"]["name"])
+            driver.find_element_by_id("app-name").send_keys(self.__config["tutum"]["service"]["name"])
             # short delay to load javascript functions
             time.sleep(3)
             driver.find_element_by_css_selector("div.overlay.overlay-override").click()
             driver.find_element_by_css_selector("input[type=\"checkbox\"]").click()
             driver.find_element_by_xpath("//div[@id='image-ports-wrapper']/div/div/div/table/tbody/tr/td[4]/span").click()
             driver.find_element_by_css_selector("input.form-control.input-sm").clear()
-            driver.find_element_by_css_selector("input.form-control.input-sm").send_keys(self.config["tutum"]["service"]["port"])
+            driver.find_element_by_css_selector("input.form-control.input-sm").send_keys(self.__config["tutum"]["service"]["port"])
             driver.find_element_by_id("step-container").click()
             driver.find_element_by_id("btn-deploy-services").click()
             # short delay to launch the service
@@ -265,7 +270,7 @@ class AWSDeployer(object):
             self.__logger.debug("Container successfully deployed and available")
         else:
             self.__logger.debug("Container already deployed and available")
-            driver.find_element_by_link_text(self.config["tutum"]["service"]["name"]).click()
+            driver.find_element_by_link_text(self.__config["tutum"]["service"]["name"]).click()
 
         driver.find_element_by_css_selector("td.container-link.sortable.renderable > a").click()
         driver.find_element_by_css_selector("#node > a").click()
@@ -282,21 +287,21 @@ class AWSDeployer(object):
         """
 
         driver = self.driver
-        self.__logger.debug("Connecting to %s:%s...", ip, self.config["tutum"]["service"]["port"])
-        driver.get("http://" + ip + ":" + self.config["tutum"]["service"]["port"])
+        self.__logger.debug("Connecting to %s:%s...", ip, self.__config["tutum"]["service"]["port"])
+        driver.get("http://" + ip + ":" + self.__config["tutum"]["service"]["port"])
 
     def login_into_aws(self):
         """ Login into AWS
         """
 
         driver = self.driver
-        driver.get(self.config["aws"]["url"])
+        driver.get(self.__config["aws"]["url"])
         self.__logger.debug("Logging into AWS...")
         if self.is_element_present("id", "ap_email") and self.is_element_present("id", "ap_password"):
             driver.find_element_by_id("ap_email").clear()
-            driver.find_element_by_id("ap_email").send_keys(self.config["aws"]["credentials"]["email"])
+            driver.find_element_by_id("ap_email").send_keys(self.__config["aws"]["credentials"]["email"])
             driver.find_element_by_id("ap_password").clear()
-            driver.find_element_by_id("ap_password").send_keys(self.config["aws"]["credentials"]["password"])
+            driver.find_element_by_id("ap_password").send_keys(self.__config["aws"]["credentials"]["password"])
             driver.find_element_by_id("signInSubmit-input").click()
             self.__logger.debug("Successfully logged into AWS")
         else:
