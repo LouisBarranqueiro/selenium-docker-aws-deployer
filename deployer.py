@@ -65,8 +65,7 @@ class AWSDeployer(object):
         self.watch_app(app_ip)
         finished_at = datetime.now().strftime('%H%M%S')
         duration = datetime.strptime(finished_at, "%H%M%S") - datetime.strptime(started_at, "%H%M%S")
-        self.__logger.debug("Application successfully deployed in %d minutes and %d seconds", (duration.seconds % 3600) // 60, duration.seconds % 60)
-
+        self.__logger.debug("Application successfully deployed in %d minutes and %d seconds" % (((duration.seconds % 3600) // 60), duration.seconds % 60))
     def login_into_github(self):
         """ Login into DockerHub
         """
@@ -92,7 +91,7 @@ class AWSDeployer(object):
         driver = self.driver
         # login into GitHub
         self.login_into_github()
-        self.__logger.debug("forking repository : %s/%s ...", self.__config["gitHub"]['starterRepository']["owner"], self.__config["gitHub"]['starterRepository']["owner"])
+        self.__logger.debug("forking repository : %s/%s ..." %  (self.__config["gitHub"]['starterRepository']["owner"], self.__config["gitHub"]['starterRepository']["owner"]))
         # fork the GitHub starter repository if it's not the case
         if not self.is_element_present_by_css_selector("#repo_listing .fork a[href=\"/" + self.__config["gitHub"]["credentials"]["name"] + "/" + self.__config["gitHub"]["starterRepository"][
             "name"] + "\"]"):
@@ -287,7 +286,7 @@ class AWSDeployer(object):
         """
 
         driver = self.driver
-        self.__logger.debug("Connecting to %s:%s...", ip, self.__config["tutum"]["service"]["port"])
+        self.__logger.debug("Connecting to %s:%s..." %  (ip, self.__config["tutum"]["service"]["port"]))
         driver.get("http://" + ip + ":" + self.__config["tutum"]["service"]["port"])
 
     def login_into_aws(self):
