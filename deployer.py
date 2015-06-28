@@ -10,8 +10,8 @@ import unittest
 import time
 import logging
 
-class AWSDeployer(object):
 
+class AWSDeployer(object):
     __logger = None
 
     def __init__(self):
@@ -41,6 +41,7 @@ class AWSDeployer(object):
         """ Login into Github account and fork the "django-docker-started" repository
         """
 
+
         # go on the `django-docker-starter` GitHub repository and fork repository
         self.fork_github_repo()
         # create automated build repository on DockerHub
@@ -61,9 +62,9 @@ class AWSDeployer(object):
         """ Login into DockerHub
         """
 
-        self.__logger.debug("Logging into GitHub...")
         driver = self.driver
         driver.get(self.config["gitHub"]["url"])
+        self.__logger.debug("Logging into GitHub...")
         if self.is_element_present_by_css_selector("a[href=\"/login\"]"):
             driver.find_element_by_css_selector("a[href=\"/login\"]").click()
             driver.find_element_by_id("login_field").clear()
@@ -71,7 +72,7 @@ class AWSDeployer(object):
             driver.find_element_by_id("password").clear()
             driver.find_element_by_id("password").send_keys(self.config["gitHub"]["credentials"]["password"])
             driver.find_element_by_name("commit").click()
-            self.__logger.debug("Logged into GitHub")
+            self.__logger.debug("Successfully Logged into GitHub")
         else:
             self.__logger.debug("Already logged into GitHub")
 
@@ -96,10 +97,9 @@ class AWSDeployer(object):
         """ Login into Docker Hub
         """
 
-        self.__logger.debug("Logging into DockerHub...")
-
         driver = self.driver
         driver.get(self.config["dockerHub"]["url"])
+        self.__logger.debug("Logging into DockerHub...")
         if self.is_element_present_by_css_selector("a[href=\"/account/login/\"]"):
             driver.find_element_by_css_selector("a[href=\"/account/login/\"]").click()
             driver.find_element_by_id("id_username").clear()
@@ -107,9 +107,9 @@ class AWSDeployer(object):
             driver.find_element_by_id("id_password").clear()
             driver.find_element_by_id("id_password").send_keys(self.config["dockerHub"]["credentials"]["password"])
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
-            self.__logger.debug("Logged into DockerHub")
+            self.__logger.debug("Successfully logged into DockerHub")
         else:
-            self.__logger.debug("Already logger into GitHub")
+            self.__logger.debug("Already logged into GitHub")
 
     def create_dockerhub_build_repo(self):
         """
@@ -160,7 +160,7 @@ class AWSDeployer(object):
             driver.find_element_by_id("id_password").clear()
             driver.find_element_by_id("id_password").send_keys(self.config["tutum"]["credentials"]["password"])
             driver.find_element_by_xpath("//button[@type='submit']").click()
-            self.__logger.debug("Logged into Tutum")
+            self.__logger.debug("Successfully logged into Tutum")
         else:
             self.__logger.debug("Already logged into Tutum")
 
@@ -190,7 +190,6 @@ class AWSDeployer(object):
         else:
             self.__logger.debug("AWS account already linked")
 
-
     def create_tutum_node(self):
         """ Create a Tutum node based on AWS
         """
@@ -217,7 +216,6 @@ class AWSDeployer(object):
             self.__logger.debug("Cluster node successfully deployed")
         else:
             self.__logger.debug("Cluster node already created")
-
 
     def create_tutum_service(self):
         """ Create a Tutum service based on the docker container previously built
@@ -281,6 +279,7 @@ class AWSDeployer(object):
         """
 
         driver = self.driver
+        self.__logger.debug("Joinning app at %s:%s...", ip, self.config["tutum"]["node"]["port"])
         driver.get("http://" + ip)
         time.sleep(20)
 
@@ -290,12 +289,16 @@ class AWSDeployer(object):
 
         driver = self.driver
         driver.get(self.config["aws"]["url"])
+        self.__logger.debug("Logging into AWS...")
         if self.is_element_present("id", "ap_email") and self.is_element_present("id", "ap_password"):
             driver.find_element_by_id("ap_email").clear()
             driver.find_element_by_id("ap_email").send_keys(self.config["aws"]["credentials"]["email"])
             driver.find_element_by_id("ap_password").clear()
             driver.find_element_by_id("ap_password").send_keys(self.config["aws"]["credentials"]["password"])
             driver.find_element_by_id("signInSubmit-input").click()
+            self.__logger.debug("Successfully logged into AWS")
+        else:
+            self.__logger.debug("Already Logged into AWS")
 
     def create_tutum_user_on_aws(self):
         """ Create a user (name: tutum) on AWS
@@ -304,6 +307,7 @@ class AWSDeployer(object):
         driver = self.driver
         # login into AWS
         self.login_into_aws()
+        self.__logger.debug("Creating tutum user on AWS...")
         driver.find_element_by_css_selector("a.service[data-service-id=\"iam\"]").click()
         driver.find_element_by_link_text("Users").click()
         # create a `tutum` user if he doesn't exist
@@ -316,10 +320,13 @@ class AWSDeployer(object):
             # Get information of `tutum` user
             tutum_access_key_id = driver.find_elements_by_class_name("attrValue")[0].text
             tutum_secret_access_key = driver.find_elements_by_class_name("attrValue")[1].text
+            self.__logger.debug("Tutum user successfully added")
         else:
+            self.__logger.debug("Tutum user already exists")
             tutum_access_key_id = None
             tutum_secret_access_key = None
 
+        self.__logger.debug("Adding policies to tutum user...")
         driver.find_element_by_link_text("Policies").click()
         if self.is_element_present_by_css_selector("button.getStarted"):
             driver.find_element_by_css_selector("button.getStarted").click()
@@ -332,6 +339,9 @@ class AWSDeployer(object):
             time.sleep(5)
             driver.find_element_by_css_selector("div.tableField").click()
             driver.find_element_by_css_selector("button.submit").click()
+            self.__logger.debug("EC2 Full Access policy successfully added to tutum user")
+        else:
+            self.__logger.debug("EC2 Full Access policy already added to tutum user")
 
         return tutum_access_key_id, tutum_secret_access_key
 
