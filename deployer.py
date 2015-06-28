@@ -41,7 +41,7 @@ class AWSDeployer(object):
         """ Login into Github account and fork the "django-docker-started" repository
         """
 
-
+        self.__logger.debug("Starting deployement...")
         # go on the `django-docker-starter` GitHub repository and fork repository
         self.fork_github_repo()
         # create automated build repository on DockerHub
@@ -57,6 +57,7 @@ class AWSDeployer(object):
         app_ip = self.create_tutum_service()
         # Watch application
         self.watch_app(app_ip)
+        self.__logger.debug("Application successfully deployed")
 
     def login_into_github(self):
         """ Login into DockerHub
@@ -386,6 +387,13 @@ class AWSDeployer(object):
         return True
 
     def _is_visible(self, locator, timeout = 2):
+        """
+        Check if an element is visible
+        :param locator:
+        :param timeout:
+        :return:
+        """
+
         try:
             ui.WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located((By.CSS_SELECTOR, locator)))
             return True
