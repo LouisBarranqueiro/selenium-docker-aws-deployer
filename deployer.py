@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 import selenium.webdriver.support.expected_conditions as EC
 import selenium.webdriver.support.ui as ui
 import time
+from datetime import datetime
 import logging
 
 
@@ -45,8 +46,7 @@ class AWSDeployer(object):
         """ Login into Github account and fork the starter repository
         """
 
-        started_at = time.time()
-        time.sleep(10)
+        started_at = datetime.now().strftime('%H%M%S')
         self.__logger.debug("Starting deployement...")
         # go on the `django-docker-starter` GitHub repository and fork repository
         self.fork_github_repo()
@@ -63,8 +63,9 @@ class AWSDeployer(object):
         app_ip = self.create_tutum_service()
         # Watch application
         self.watch_app(app_ip)
-        finished_at = time.time()
-        self.__logger.debug("Application successfully deployed in %ds", (finished_at - started_at))
+        finished_at = datetime.now().strftime('%H%M%S')
+        duration = datetime.strptime(finished_at, "%H%M%S") - datetime.strptime(started_at, "%H%M%S")
+        self.__logger.debug("Application successfully deployed in %d minutes and %d seconds", (duration.seconds % 3600) // 60, duration.seconds % 60)
 
     def login_into_github(self):
         """ Login into DockerHub
