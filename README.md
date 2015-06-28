@@ -1,6 +1,6 @@
 # selenium-docker-aws-deployer
 
-A python script using selenium API to deploy on AWS an application embedded in a docker container. **Deploy your application for free in minutes without commands only via the interfaces of web applications** :)
+A script using selenium API to deploy on AWS an application embedded in a Docker container. **It deploy your application for free in minutes without commands only via the interfaces of web applications** :)
 
 ## General
 
@@ -9,6 +9,7 @@ A python script using selenium API to deploy on AWS an application embedded in a
 ## Requirements
 
 * Python v2.7 
+* PIP
 * A GitHub account
 * A DockerHub account
 * A Tutum account
@@ -70,7 +71,7 @@ Edit `config.json` to configure the deployer.
     * **credentials** :
         * **email** : your GitHub account email
         * **password** : your GitHub account password
-    * **repository** : Repository informations which contains Dockerfile and app to be deployed
+    * **repository** : Repository which contains Dockerfile and app to be deployed
         * **owner** : owner of the starter repository
         * **name** : name of the starter repository
 * **dockerHub** :
