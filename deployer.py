@@ -6,7 +6,6 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 import selenium.webdriver.support.expected_conditions as EC
 import selenium.webdriver.support.ui as ui
-import unittest
 import time
 import logging
 
@@ -41,6 +40,8 @@ class AWSDeployer(object):
         """ Login into Github account and fork the "django-docker-started" repository
         """
 
+        started_at = time.time()
+        time.sleep(10)
         self.__logger.debug("Starting deployement...")
         # go on the `django-docker-starter` GitHub repository and fork repository
         self.fork_github_repo()
@@ -57,7 +58,8 @@ class AWSDeployer(object):
         app_ip = self.create_tutum_service()
         # Watch application
         self.watch_app(app_ip)
-        self.__logger.debug("Application successfully deployed")
+        finished_at = time.time()
+        self.__logger.debug("Application successfully deployed in %ds", (finished_at - started_at))
 
     def login_into_github(self):
         """ Login into DockerHub
@@ -280,7 +282,7 @@ class AWSDeployer(object):
         """
 
         driver = self.driver
-        self.__logger.debug("Joinning app at %s:%s...", ip, self.config["tutum"]["node"]["port"])
+        self.__logger.debug("Joinning app at %s:%s...", ip, self.config["tutum"]["service"]["port"])
         driver.get("http://" + ip)
         time.sleep(20)
 
