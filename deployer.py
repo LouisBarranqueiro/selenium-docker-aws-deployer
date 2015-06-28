@@ -53,10 +53,10 @@ class AWSDeployer(object):
         # create automated build repository on DockerHub
         self.create_dockerhub_build_repo()
         # create `tutum` user on AWS
-        tutum_access_key_id, tutum_secret_access_key = self.create_tutum_user_on_aws()
+        tutum_login, tutum_pw = self.create_tutum_user_on_aws()
         # link AWS account to Tutum
-        if tutum_access_key_id != None and tutum_secret_access_key != None:
-            self.link_aws_account_to_tutum(tutum_access_key_id, tutum_secret_access_key)
+        if tutum_login != None and tutum_pw != None:
+            self.link_aws_account_to_tutum(tutum_login, tutum_pw)
         # create tutum node on Tutum
         self.create_tutum_node()
         # create tutum service on Tutum
@@ -340,13 +340,13 @@ class AWSDeployer(object):
             driver.find_element_by_xpath("//div[@id='c']/div/div[2]/div/div[2]/div[3]/div/button").click()
             driver.find_element_by_link_text("Show User Security Credentials").click()
             # Get information of `tutum` user
-            tutum_access_key_id = driver.find_elements_by_class_name("attrValue")[0].text
-            tutum_secret_access_key = driver.find_elements_by_class_name("attrValue")[1].text
+            tutum_login = driver.find_elements_by_class_name("attrValue")[0].text
+            tutum_pw = driver.find_elements_by_class_name("attrValue")[1].text
             self.__logger.debug("Tutum user successfully added")
         else:
             self.__logger.debug("Tutum user already exists")
-            tutum_access_key_id = None
-            tutum_secret_access_key = None
+            tutum_login = None
+            tutum_pw = None
 
         # Attach policy (full access to EC2) to `tutum` user
         self.__logger.debug("Adding policies to tutum user...")
@@ -365,7 +365,7 @@ class AWSDeployer(object):
         else:
             self.__logger.debug("EC2 Full Access policy already added to tutum user")
 
-        return tutum_access_key_id, tutum_secret_access_key
+        return tutum_login, tutum_pw
 
     def is_element_present(self, how, what):
         """
