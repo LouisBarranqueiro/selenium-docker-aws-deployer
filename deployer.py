@@ -284,7 +284,6 @@ class AWSDeployer(object):
         driver = self.driver
         self.__logger.debug("Joinning app at %s:%s...", ip, self.config["tutum"]["service"]["port"])
         driver.get("http://" + ip)
-        time.sleep(20)
 
     def login_into_aws(self):
         """ Login into AWS
