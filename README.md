@@ -6,8 +6,9 @@ A python script using selenium API to deploy on AWS an application embedded in a
 
 * Author : Louis Barranqueiro
 
-## requirements
+## Requirements
 
+* Python v2.7 
 * A GitHub account
 * A DockerHub account
 * A Tutum account
@@ -95,3 +96,17 @@ Edit `config.json` to configure the deployer.
     * **credentials** :
         * **email** : your AWS account email
         * **password** : your AWS account password
+
+## Steps
+
+1. Login into GitHub
+2. Fork the starter repository
+3. Login into DockerHub
+4. Create an automated build repository based on GitHub starter repository just forked
+5. Login into AWS
+6. Create tutum user in IAM AWS service and attach Full Access to EC2 AWS service
+7. Login into Tutum
+8. Link Tutum user created on AWS to Tutum account
+9. Create a node (cluster) on EC2 AWS service (t2.micro [1 CPUs, 1GB RAM]) via Tutum 
+10. Create a service with DockerHub image previously built via Tutum
+11. Go on node ip to watch application just deployed on EC2 AWS service in live 
