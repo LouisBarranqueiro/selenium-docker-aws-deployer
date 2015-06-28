@@ -110,3 +110,7 @@ Edit `config.json` to configure the deployer.
 9. Create a node (cluster) on EC2 AWS service (t2.micro [1 CPUs, 1GB RAM]) via Tutum 
 10. Create a service with DockerHub image previously built via Tutum
 11. Go on node ip to watch application just deployed on EC2 AWS service in live 
+
+## License 
+
+selenium-docker-aws-deployer is under [MIT License](https://github.com/LouisBarranqueiro/selenium-docker-aws-deployer/blob/master/LICENSE)
