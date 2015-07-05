@@ -247,7 +247,7 @@ class AWSDeployer(object):
         # create a service if it doesn't exist
         if not self.is_element_present_by_link_text(self.__config["tutum"]["service"]["name"]):
             driver.find_element_by_css_selector("a[href=\"/container/launch/\"]").click()
-            driver.find_element_by_link_text("Public images").click()
+            driver.find_element_by_link_text("Public repositories").click()
             driver.find_element_by_link_text("Search Docker hub").click()
             driver.find_element_by_id("search").clear()
             driver.find_element_by_id("search").send_keys(self.__config["dockerHub"]["repository"]["name"])
