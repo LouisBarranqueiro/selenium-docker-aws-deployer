@@ -284,7 +284,7 @@ class AWSDeployer(object):
             driver.find_element_by_link_text(self.__config["tutum"]["service"]["name"]).click()
 
         # get node ip where container has been deployed
-        driver.find_element_by_css_selector("td.container-link.sortable.renderable > a").click()
+        driver.find_element_by_css_selector("td.container-link.renderable > a").click()
         driver.find_element_by_css_selector("#node > a").click()
         driver.execute_script("document.getElementsByClassName('info-bar')[0].getElementsByClassName('icon-link')[0].remove()")
         node_ip = driver.find_element_by_xpath("//div[@class='info-bar']/div[@class='app-info'][1]").text
