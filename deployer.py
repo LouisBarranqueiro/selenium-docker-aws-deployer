@@ -157,11 +157,11 @@ class AWSDeployer(object):
         else:
             self.__logger.debug("Automated build repository already created")
 
-            # wait until docker image be built
-            # while not self._is_visible("#rightcol .row a[href=\"/u/%s/%s/\"] .stars-and-downloads-container"
-            #                             % (self.__config["dockerHub"]["credentials"]["name"],
-            #                                self.__config["dockerHub"]["repository"]["name"])):
-            #      driver.get(self.__config["dockerHub"]["url"])
+        # wait until docker image be built
+        while not self._is_visible("#rightcol .row a[href=\"/u/%s/%s/\"] .stars-and-downloads-container"
+                                    % (self.__config["dockerHub"]["credentials"]["name"],
+                                       self.__config["dockerHub"]["repository"]["name"])):
+             driver.get(self.__config["dockerHub"]["url"])
 
     def login_into_tutum(self):
         """ Login into Tutum
